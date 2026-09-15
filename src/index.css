@@ -1,7 +1,10 @@
 @import "tailwindcss";
+@config "../tailwind.config.ts";
 
 @layer base {
   body {
-    @apply bg-white text-black font-sans;
+    background-color: white;
+    color: black;
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
   }
 }
