@@ -25,7 +25,7 @@ export function VehicleProfileLayout() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-oryx-blue mb-1">
-        {vehicle.brand} {vehicle.model}
+        {vehicle.brand ?? 'Not Available'} {vehicle.model ?? 'Not Available'}
       </h1>
       <p className="text-oryx-silver mb-4">Plate: {vehicle.plate_no}</p>
       <div className="flex gap-4 border-b border-oryx-silver mb-4">
