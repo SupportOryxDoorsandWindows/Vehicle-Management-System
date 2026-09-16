@@ -1,7 +1,7 @@
 import type { SystemCategory } from '../types';
 
-const SUMMABLE_CATEGORIES = ['fuel', 'insurance', 'repairs', 'maintenance', 'registration', 'other'] as const;
-type SummableCategory = (typeof SUMMABLE_CATEGORIES)[number];
+export const SUMMABLE_CATEGORIES = ['fuel', 'insurance', 'repairs', 'maintenance', 'registration', 'other'] as const;
+export type SummableCategory = (typeof SUMMABLE_CATEGORIES)[number];
 
 export interface ExpenseLike {
   systemCategory: SystemCategory;
@@ -33,7 +33,7 @@ function sumByCategory(expenses: ExpenseLike[]): Record<SummableCategory, number
   return totals;
 }
 
-function calculateFinancingCost(finance: VehicleFinanceInfo, asOf: Date): number | null {
+export function calculateFinancingCost(finance: VehicleFinanceInfo, asOf: Date): number | null {
   if (
     finance.monthlyRepayment == null ||
     finance.financeAmount == null ||
