@@ -1,6 +1,15 @@
 export function sqlValue(value: unknown): string {
   if (value === null || value === undefined || value === '') return 'NULL';
-  if (value instanceof Date) return `'${value.toISOString().slice(0, 10)}'`;
+  if (value instanceof Date) {
+    // Format from local calendar components, not toISOString(), which
+    // converts to UTC first and can shift the date by a day depending on
+    // the machine's timezone relative to the source data's assumed
+    // timezone (SheetJS returns dates as local-time near-midnight).
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `'${year}-${month}-${day}'`;
+  }
   if (typeof value === 'number') return String(value);
   return `'${String(value).replace(/'/g, "''")}'`;
 }

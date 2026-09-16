@@ -13,8 +13,15 @@ describe('sqlValue', () => {
   it('renders numbers unquoted', () => {
     expect(sqlValue(1250)).toBe('1250');
   });
-  it('renders dates as YYYY-MM-DD', () => {
-    expect(sqlValue(new Date('2026-09-15T00:00:00.000Z'))).toBe("'2026-09-15'");
+  it('renders dates as YYYY-MM-DD using local calendar components, not UTC', () => {
+    // Construct via the local-time Date constructor (not an ISO string) so this
+    // test verifies local-component formatting without being timezone-flaky
+    // itself: new Date(y, m, d) always means midnight local time, wherever the
+    // test runs, and should always format back to the same y-m-d.
+    expect(sqlValue(new Date(2026, 8, 15))).toBe("'2026-09-15'");
+    // Near-midnight local time (e.g. 23:59:48, as SheetJS returns) must not
+    // roll over to the next day when converted through toISOString()/UTC.
+    expect(sqlValue(new Date(2026, 9, 16, 23, 59, 48))).toBe("'2026-10-16'");
   });
 });
 
