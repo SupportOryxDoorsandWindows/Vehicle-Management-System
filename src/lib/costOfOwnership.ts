@@ -76,7 +76,12 @@ export function calculateCostOfOwnership(
   let averageMonthlyCost: number | null = null;
   if (registrationDate) {
     const start = new Date(registrationDate);
-    const years = Math.max(1, asOf.getFullYear() - start.getFullYear() + 1);
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const elapsedDays = (asOf.getTime() - start.getTime()) / msPerDay;
+    const elapsedYears = elapsedDays / 365.25;
+    // Floor at 1 year so a recently-registered vehicle's cost isn't divided by
+    // a fraction below 1 (which would inflate, not deflate, the average).
+    const years = Math.max(1, elapsedYears);
     averageAnnualCost = totalCost / years;
     averageMonthlyCost = totalCost / (years * 12);
   }

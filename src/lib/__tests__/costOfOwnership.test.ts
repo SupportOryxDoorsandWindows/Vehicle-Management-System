@@ -66,7 +66,11 @@ describe('calculateCostOfOwnership', () => {
       null,
       asOf
     );
-    expect(withReg.averageAnnualCost).toBe(600); // 1200 total / 2 years elapsed (inclusive)
+    // 2025-09-15 to 2026-09-15 (asOf) is exactly ~1 year elapsed (365 days), not 2
+    // calendar years — 1200 total / 1 year elapsed = 1200. The old expected value of
+    // 600 came from a buggy "calendar-year-boundary-crossings + 1" formula baked into
+    // both the original implementation and this fixture; fixed per reviewer finding.
+    expect(withReg.averageAnnualCost).toBe(1200);
   });
 
   it('computes costPerKm only when mileage is present and positive', () => {
