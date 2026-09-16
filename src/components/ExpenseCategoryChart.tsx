@@ -13,7 +13,7 @@ export function ExpenseCategoryChart({ data }: { data: CategoryDatum[] }) {
         <XAxis dataKey="category" stroke="#022A3A" />
         <YAxis stroke="#022A3A" />
         <Tooltip formatter={(value: unknown) => `AED ${Number(value).toLocaleString('en-AE')}`} />
-        <Bar dataKey="amount" fill="#022A3A" />
+        <Bar dataKey="amount" fill="#022A3A" isAnimationActive={false} />
       </BarChart>
     </ResponsiveContainer>
   );
