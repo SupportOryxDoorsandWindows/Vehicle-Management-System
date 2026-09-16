@@ -12,7 +12,7 @@ export function VehicleCard({ vehicle, totalExpenses }: { vehicle: Vehicle; tota
       <VehiclePlaceholderImage className="h-36" />
       <div className="p-4">
         <h3 className="font-semibold text-oryx-blue">
-          {vehicle.brand} {vehicle.model}
+          {vehicle.brand ?? 'Not Available'} {vehicle.model ?? 'Not Available'}
         </h3>
         <p className="text-sm text-black">Plate: {vehicle.plate_no}</p>
         <p className="text-sm text-black">Driver: {vehicle.driver ?? 'Not Assigned'}</p>

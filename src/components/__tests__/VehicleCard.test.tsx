@@ -38,4 +38,13 @@ describe('VehicleCard', () => {
     );
     expect(screen.getByText(/Not Assigned/)).toBeInTheDocument();
   });
+
+  it('shows Not Available in the title when brand or model is missing', () => {
+    render(
+      <MemoryRouter>
+        <VehicleCard vehicle={{ ...vehicle, brand: null, model: null }} totalExpenses={0} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Not Available Not Available/)).toBeInTheDocument();
+  });
 });
