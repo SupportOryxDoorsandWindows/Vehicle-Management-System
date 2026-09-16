@@ -1,32 +1,31 @@
-# React + TypeScript + Vite
+# Vehicle Management System — Phase 1
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A fleet vehicle and cost-tracking system built for Oryx Doors & Windows. Phase 1 covers the vehicle register, expense tracking, maintenance/document/finance tabs, and cost-of-ownership reporting, backed by Supabase.
 
-Currently, two official plugins are available:
+## Getting started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+cp .env.example .env   # fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Testing
+
+- `npm test` — the hermetic unit/component suite. No network access required; safe to run on a fresh clone, in CI, or offline.
+- `npm run test:integration` — integration tests that hit the live Supabase project directly using the credentials in `.env`. Requires network access and a configured `.env`.
+
+## Building
+
+```bash
+npm run build
+```
+
+## Data notes
+
+- `data/source/*.xlsx` are the original spreadsheet fixtures used to generate the seed data (see `scripts/import/`).
+- `supabase/seed/seed_data.sql` is deliberately gitignored — it contains real driver names and cost figures and must not be committed.
+
+## Further reading
+
+Design spec and implementation plan live under `docs/superpowers/specs/` and `docs/superpowers/plans/`.
