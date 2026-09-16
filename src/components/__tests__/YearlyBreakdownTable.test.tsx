@@ -113,6 +113,32 @@ describe('YearlyBreakdownTable', () => {
     expect(cells[4]).toHaveTextContent('AED 15,000');
   });
 
+  it('shows Not Available (never AED 0) in the Total Cost row for a year with zero data in every category', () => {
+    // Registered 2024-01-01, asOf Sept 2026, no finance -> 2024/2025/2026 columns.
+    // Only 2026 has any expense data, so 2024 and 2025 should show Not Available
+    // in every category row AND in the Total Cost row for those years.
+    const expenses: YearlyExpenseLike[] = [
+      { date: '2026-05-01', systemCategory: 'fuel', cost: 400 },
+    ];
+    render(
+      <YearlyBreakdownTable
+        expenses={expenses}
+        finance={noFinance}
+        registrationDate="2024-01-01"
+        asOf={asOf}
+      />
+    );
+
+    const totalCostRow = screen.getByText('Total Cost').closest('tr')!;
+    const cells = within(totalCostRow).getAllByRole('cell');
+    // cells[0] is the row label; cells[1..3] are 2024/2025/2026; cells[4] is Total.
+    expect(cells[1]).toHaveTextContent('Not Available');
+    expect(cells[2]).toHaveTextContent('Not Available');
+    expect(cells[3]).toHaveTextContent('AED 400');
+    expect(cells[1]).not.toHaveTextContent('AED 0');
+    expect(cells[2]).not.toHaveTextContent('AED 0');
+  });
+
   it('shows Not Available for the whole table when the vehicle has no registration date', () => {
     render(
       <YearlyBreakdownTable expenses={[]} finance={noFinance} registrationDate={null} asOf={asOf} />

@@ -24,6 +24,14 @@ describe('calculateCostOfOwnership', () => {
     expect(result.excludedCategories).toContain('taxesAndFees');
   });
 
+  it('returns null totalCost, averageAnnualCost and averageMonthlyCost for a vehicle with zero expenses and no finance data (never AED 0)', () => {
+    const result = calculateCostOfOwnership([], noFinance, '2025-09-15', null, asOf);
+    expect(result.totalCost).toBeNull();
+    expect(result.averageAnnualCost).toBeNull();
+    expect(result.averageMonthlyCost).toBeNull();
+    expect(result.costPerKm).toBeNull();
+  });
+
   it('sums only present categories into totalCost, excluding Not Available ones', () => {
     const expenses: ExpenseLike[] = [
       { systemCategory: 'fuel', cost: 100 },

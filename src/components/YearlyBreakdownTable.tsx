@@ -116,9 +116,9 @@ export function YearlyBreakdownTable({
   });
 
   const totalCostValues = years.map((_, yearIndex) =>
-    rows.reduce((sum, row) => sum + (row.values[yearIndex] ?? 0), 0)
+    rowTotal(rows.map((row) => row.values[yearIndex]))
   );
-  const totalCostTotal = totalCostValues.reduce((sum, v) => sum + v, 0);
+  const totalCostTotal = rowTotal(totalCostValues);
 
   return (
     <div>

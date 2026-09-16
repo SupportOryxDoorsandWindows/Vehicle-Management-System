@@ -16,7 +16,7 @@ export interface VehicleFinanceInfo {
 
 export interface CostOfOwnership {
   categories: Record<SummableCategory | 'financing' | 'depreciation' | 'taxesAndFees', number | null>;
-  totalCost: number;
+  totalCost: number | null;
   excludedCategories: string[];
   averageAnnualCost: number | null;
   averageMonthlyCost: number | null;
@@ -67,14 +67,14 @@ export function calculateCostOfOwnership(
     .filter(([, value]) => value === null)
     .map(([key]) => key);
 
-  const totalCost = Object.values(categories).reduce(
-    (sum: number, value) => sum + (value ?? 0),
-    0
-  );
+  const totalCost: number | null =
+    excludedCategories.length === Object.keys(categories).length
+      ? null
+      : Object.values(categories).reduce((sum: number, value) => sum + (value ?? 0), 0);
 
   let averageAnnualCost: number | null = null;
   let averageMonthlyCost: number | null = null;
-  if (registrationDate) {
+  if (registrationDate && totalCost !== null) {
     const start = new Date(registrationDate);
     const msPerDay = 1000 * 60 * 60 * 24;
     const elapsedDays = (asOf.getTime() - start.getTime()) / msPerDay;
@@ -87,7 +87,9 @@ export function calculateCostOfOwnership(
   }
 
   const costPerKm =
-    lastServiceMileageKm && lastServiceMileageKm > 0 ? totalCost / lastServiceMileageKm : null;
+    totalCost !== null && lastServiceMileageKm && lastServiceMileageKm > 0
+      ? totalCost / lastServiceMileageKm
+      : null;
 
   return { categories, totalCost, excludedCategories, averageAnnualCost, averageMonthlyCost, costPerKm };
 }
