@@ -25,3 +25,6 @@ supabase/seed/*.sql
 *.njsproj
 *.sln
 *.sw?
+
+# Local Claude Code tooling config
+.claude/
