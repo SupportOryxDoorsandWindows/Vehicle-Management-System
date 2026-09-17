@@ -7,11 +7,11 @@ export function Overview() {
   const vehicle = useOutletContext<Vehicle>();
   return (
     <div>
-      <div className="flex items-center gap-3 mb-4">
-        <DriverPhoto driver={vehicle.driver} className="w-12 h-12 shrink-0" />
+      <div className="flex items-center gap-4 mb-4">
+        <DriverPhoto driver={vehicle.driver} className="w-28 h-28 shrink-0" />
         <div>
           <p className="text-sm text-oryx-silver">Driver</p>
-          <p className="text-black">{vehicle.driver ?? 'Not Assigned'}</p>
+          <p className="text-black text-lg font-medium">{vehicle.driver ?? 'Not Assigned'}</p>
         </div>
       </div>
       <FieldList
