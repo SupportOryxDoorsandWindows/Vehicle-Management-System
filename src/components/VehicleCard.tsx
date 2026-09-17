@@ -2,14 +2,23 @@ import { Link } from 'react-router-dom';
 import type { Vehicle } from '../types';
 import { formatAED } from '../lib/format';
 import { VehiclePlaceholderImage } from './VehiclePlaceholderImage';
+import { getVehicleImagePath } from '../lib/vehicleImage';
 
 export function VehicleCard({ vehicle, totalExpenses }: { vehicle: Vehicle; totalExpenses: number }) {
+  const imagePath = getVehicleImagePath(vehicle.model);
   return (
     <Link
       to={`/vehicles/${vehicle.id}`}
       className="block border border-oryx-silver rounded-lg overflow-hidden hover:shadow-md transition-shadow"
     >
-      <VehiclePlaceholderImage className="h-36" />
+      {imagePath ? (
+        <div className="h-36 bg-white border-b border-oryx-silver relative">
+          <img src={imagePath} alt={`${vehicle.brand ?? ''} ${vehicle.model ?? ''}`} className="w-full h-full object-contain p-2" />
+          <span className="absolute bottom-1 right-2 text-xs text-oryx-silver">Representative image</span>
+        </div>
+      ) : (
+        <VehiclePlaceholderImage className="h-36" />
+      )}
       <div className="p-4">
         <h3 className="font-semibold text-oryx-blue">
           {vehicle.brand ?? 'Not Available'} {vehicle.model ?? 'Not Available'}
