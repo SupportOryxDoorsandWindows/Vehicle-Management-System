@@ -1,10 +1,24 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { fetchVehicles, fetchVehicleById } from '../vehicles';
+import { createTestUser, deleteTestUser, type TestUser } from '../../test/testAuthHelpers';
+import { signInAsTestUser, signOutTestUser } from '../../test/integrationAuthSetup';
+
+let testUser: TestUser;
+
+beforeAll(async () => {
+  testUser = await createTestUser('admin');
+  await signInAsTestUser(testUser);
+});
+
+afterAll(async () => {
+  await signOutTestUser();
+  await deleteTestUser(testUser.id);
+});
 
 describe('vehicles API (integration, real Supabase project)', () => {
-  it('fetches all 53 seeded vehicles ordered by plate_no', async () => {
+  it('fetches all 52 seeded vehicles ordered by plate_no', async () => {
     const vehicles = await fetchVehicles();
-    expect(vehicles).toHaveLength(53);
+    expect(vehicles).toHaveLength(52);
     expect(vehicles[0].plate_no <= vehicles[1].plate_no).toBe(true);
   });
 

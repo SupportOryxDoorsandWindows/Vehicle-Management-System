@@ -1,6 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { fetchVehicles } from '../vehicles';
 import { fetchExpensesByVehicle, fetchUnassignedExpenses, fetchAllExpenses } from '../expenses';
+import { createTestUser, deleteTestUser, type TestUser } from '../../test/testAuthHelpers';
+import { signInAsTestUser, signOutTestUser } from '../../test/integrationAuthSetup';
+
+let testUser: TestUser;
+
+beforeAll(async () => {
+  testUser = await createTestUser('admin');
+  await signInAsTestUser(testUser);
+});
+
+afterAll(async () => {
+  await signOutTestUser();
+  await deleteTestUser(testUser.id);
+});
 
 describe('expenses API (integration, real Supabase project)', () => {
   it('fetches all 54 seeded expenses', async () => {
