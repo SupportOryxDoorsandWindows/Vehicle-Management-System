@@ -28,6 +28,20 @@ describe('RLS enforcement (integration, real Supabase project)', () => {
       expect(readError).toBeNull();
       expect(readData!.length).toBeGreaterThan(0);
 
+      // Self-certify the premise: confirm plate U 67931 actually exists (and
+      // capture its current remarks) via the viewer's own read, before
+      // attempting the blocked write. Without this, a zero-rows-updated
+      // result below could mean either "RLS blocked the write" or "the
+      // WHERE clause never matched anything" (e.g. a mistyped plate) — this
+      // test must not rely on a sibling test to rule out the latter.
+      const { data: before, error: beforeError } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('plate_no', 'U 67931');
+      expect(beforeError).toBeNull();
+      expect(before!.length).toBe(1);
+      const originalRemarks = before![0].remarks;
+
       // Postgres RLS silently excludes rows that fail the policy's USING
       // clause rather than raising an error, so a blocked write returns
       // HTTP 200 with zero affected rows, not a PostgREST error. Assert on
@@ -39,6 +53,16 @@ describe('RLS enforcement (integration, real Supabase project)', () => {
         .select();
       expect(writeError).toBeNull();
       expect(writeData).toEqual([]);
+
+      // Confirm the row still exists, unchanged, ruling out a WHERE-clause
+      // mismatch as the reason the update above touched zero rows.
+      const { data: after, error: afterError } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('plate_no', 'U 67931');
+      expect(afterError).toBeNull();
+      expect(after!.length).toBe(1);
+      expect(after![0].remarks).toBe(originalRemarks);
     } finally {
       await signOutTestUser();
       await deleteTestUser(viewer.id);
