@@ -83,6 +83,11 @@ Deno.serve(async (req) => {
     .from('profiles')
     .insert({ id: invited.user.id, email, role, active: true });
   if (profileError) {
+    // Compensating rollback: if the profile row can't be created, don't leave
+    // behind an orphaned Auth user with no matching profile — that would make
+    // every future invite for this email fail against Supabase's own
+    // "already registered" check instead of our clean 409.
+    await adminClient.auth.admin.deleteUser(invited.user.id);
     return new Response(JSON.stringify({ error: profileError.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
