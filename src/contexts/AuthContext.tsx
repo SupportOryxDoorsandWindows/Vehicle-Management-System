@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      if (!active) return;
       const eventCounter = ++eventCounterRef.current;
       setSession(newSession);
       if (newSession) {
@@ -43,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!active || eventCounterRef.current !== eventCounter) return;
         setProfile(profile);
       } else {
-        if (!active) return;
         setProfile(null);
       }
     });
