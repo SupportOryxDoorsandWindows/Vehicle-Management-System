@@ -6,7 +6,7 @@ import { Login } from '../Login';
 import { supabase } from '../../lib/supabaseClient';
 
 vi.mock('../../lib/supabaseClient', () => ({
-  supabase: { auth: { signInWithPassword: vi.fn() } },
+  supabase: { auth: { signInWithPassword: vi.fn(), resetPasswordForEmail: vi.fn() } },
 }));
 
 describe('Login', () => {
@@ -100,5 +100,27 @@ describe('Login', () => {
     await userEvent.click(screen.getByRole('button', { name: /log in/i }));
 
     expect(await screen.findByText('vehicle 42 page')).toBeInTheDocument();
+  });
+
+  it('sends a password reset email for the typed address via the "Forgot password?" link', async () => {
+    vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
+      data: {},
+      error: null,
+    } as never);
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    await userEvent.type(screen.getByLabelText(/email/i), 'a@b.com');
+    await userEvent.click(screen.getByRole('button', { name: /forgot password/i }));
+
+    expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
+      'a@b.com',
+      expect.objectContaining({ redirectTo: expect.stringContaining('/set-password') })
+    );
+    expect(await screen.findByText(/check your email/i)).toBeInTheDocument();
   });
 });

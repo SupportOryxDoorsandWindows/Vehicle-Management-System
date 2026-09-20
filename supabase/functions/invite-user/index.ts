@@ -71,7 +71,9 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email);
+  const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+    redirectTo: 'https://supportoryxdoorsandwindows.github.io/Vehicle-Management-System/set-password',
+  });
   if (inviteError || !invited.user) {
     return new Response(JSON.stringify({ error: inviteError?.message ?? 'Invite failed' }), {
       status: 500,

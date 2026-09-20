@@ -16,6 +16,7 @@ import { VehicleReports } from './pages/vehicle/VehicleReports';
 import { UnassignedExpenses } from './pages/UnassignedExpenses';
 import { Reports } from './pages/Reports';
 import { ManageUsers } from './pages/ManageUsers';
+import { SetPassword } from './pages/SetPassword';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
+                    <Route path="/set-password" element={<SetPassword />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/vehicles/:id" element={<VehicleProfileLayout />}>
                       <Route index element={<Overview />} />
