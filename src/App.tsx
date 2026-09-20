@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { RequireAuth } from './components/RequireAuth';
+import { RequireAdmin } from './components/RequireAdmin';
 import { Login } from './pages/Login';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -14,6 +15,7 @@ import { Finance } from './pages/vehicle/Finance';
 import { VehicleReports } from './pages/vehicle/VehicleReports';
 import { UnassignedExpenses } from './pages/UnassignedExpenses';
 import { Reports } from './pages/Reports';
+import { ManageUsers } from './pages/ManageUsers';
 
 export default function App() {
   return (
@@ -39,6 +41,14 @@ export default function App() {
                     </Route>
                     <Route path="/unassigned-expenses" element={<UnassignedExpenses />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route
+                      path="/users"
+                      element={
+                        <RequireAdmin>
+                          <ManageUsers />
+                        </RequireAdmin>
+                      }
+                    />
                   </Routes>
                 </Layout>
               </RequireAuth>
