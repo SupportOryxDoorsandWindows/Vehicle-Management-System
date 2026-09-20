@@ -1,11 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
 import {
   createTestUser,
   deleteTestUser,
   setTestUserActive,
-  type TestUser,
 } from '../../test/testAuthHelpers';
 import { signInAsTestUser, signOutTestUser } from '../../test/integrationAuthSetup';
 
