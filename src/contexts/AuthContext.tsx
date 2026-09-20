@@ -5,6 +5,7 @@ import type { Profile } from '../types';
 
 interface AuthState {
   loading: boolean;
+  profileLoading: boolean;
   session: Session | null;
   profile: Profile | null;
   signOut: () => Promise<void>;
@@ -19,6 +20,7 @@ async function loadProfile(userId: string): Promise<Profile | null> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const eventCounterRef = useRef(0);
@@ -40,11 +42,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const eventCounter = ++eventCounterRef.current;
       setSession(newSession);
       if (newSession) {
+        setProfileLoading(true);
         const profile = await loadProfile(newSession.user.id);
         if (!active || eventCounterRef.current !== eventCounter) return;
         setProfile(profile);
+        setProfileLoading(false);
       } else {
         setProfile(null);
+        setProfileLoading(false);
       }
     });
 
@@ -59,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ loading, session, profile, signOut }}>
+    <AuthContext.Provider value={{ loading, profileLoading, session, profile, signOut }}>
       {children}
     </AuthContext.Provider>
   );
