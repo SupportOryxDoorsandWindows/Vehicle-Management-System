@@ -92,4 +92,23 @@ describe('RequireAdmin', () => {
 
     expect(screen.getByText('manage users')).toBeInTheDocument();
   });
+
+  it('renders children during a background profile refresh (profileLoading true but profile already set)', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      loading: false,
+      profileLoading: true,
+      profile: { id: 'u1', email: 'a@b.com', role: 'admin', active: true },
+    } as never);
+
+    render(
+      <MemoryRouter initialEntries={['/users']}>
+        <Routes>
+          <Route path="/" element={<p>dashboard</p>} />
+          <Route path="/users" element={<RequireAdmin><p>manage users</p></RequireAdmin>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('manage users')).toBeInTheDocument();
+  });
 });

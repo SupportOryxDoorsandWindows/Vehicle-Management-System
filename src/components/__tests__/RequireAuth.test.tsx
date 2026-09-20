@@ -101,4 +101,22 @@ describe('RequireAuth', () => {
     expect(screen.getByRole('heading', { name: /access deactivated/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
   });
+
+  it('renders children during a background profile refresh (profileLoading true but profile already set)', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      loading: false,
+      profileLoading: true,
+      session: { user: { id: 'u1' } },
+      profile: { id: 'u1', email: 'a@b.com', role: 'viewer', active: true },
+    } as never);
+    render(
+      <MemoryRouter initialEntries={['/vehicles']}>
+        <Routes>
+          <Route path="/login" element={<p>login page</p>} />
+          <Route path="/vehicles" element={<RequireAuth><p>vehicles page</p></RequireAuth>} />
+        </Routes>
+      </MemoryRouter>
+    );
+    expect(screen.getByText('vehicles page')).toBeInTheDocument();
+  });
 });

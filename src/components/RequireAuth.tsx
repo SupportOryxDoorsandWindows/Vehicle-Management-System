@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { loading, profileLoading, session, profile, signOut } = useAuth();
   const location = useLocation();
-  if (loading || profileLoading) return null;
+  if (loading || (profileLoading && !profile)) return null;
   if (!session) return <Navigate to="/login" replace state={{ from: location }} />;
   if (!profile?.active) {
     return (
