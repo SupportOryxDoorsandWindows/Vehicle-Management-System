@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useLocation, useNavigate, type Location } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
 export function Login() {
@@ -6,6 +7,9 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: Location } | null)?.from?.pathname ?? '/';
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -13,7 +17,11 @@ export function Login() {
     setError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
-    if (error) setError(error.message);
+    if (error) {
+      setError(error.message);
+    } else {
+      navigate(from, { replace: true });
+    }
   }
 
   return (
