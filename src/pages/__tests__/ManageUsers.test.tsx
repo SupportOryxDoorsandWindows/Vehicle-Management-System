@@ -47,6 +47,17 @@ describe('ManageUsers', () => {
     expect(profilesApi.fetchProfiles).toHaveBeenCalledTimes(2);
   });
 
+  it('changes a user role via the role select', async () => {
+    render(<ManageUsers />);
+    await waitFor(() => expect(screen.getByText('viewer@oryxdoors.com')).toBeInTheDocument());
+
+    const row = screen.getByText('viewer@oryxdoors.com').closest('tr')!;
+    const { getByRole } = within(row);
+    await userEvent.selectOptions(getByRole('combobox'), 'admin');
+
+    await waitFor(() => expect(profilesApi.updateProfileRole).toHaveBeenCalledWith('u2', 'admin'));
+  });
+
   it('deactivates a user on click', async () => {
     render(<ManageUsers />);
     await waitFor(() => expect(screen.getByText('viewer@oryxdoors.com')).toBeInTheDocument());

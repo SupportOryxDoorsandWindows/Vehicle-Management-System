@@ -27,7 +27,16 @@ export function ManageUsers() {
     });
     setInviting(false);
     if (error) {
-      setInviteError(error.message);
+      let message = error.message;
+      if ('context' in error && error.context instanceof Response) {
+        try {
+          const body = await error.context.json();
+          if (body?.error) message = body.error;
+        } catch {
+          // fall back to error.message if the body isn't valid JSON
+        }
+      }
+      setInviteError(message);
       return;
     }
     setInviteEmail('');
