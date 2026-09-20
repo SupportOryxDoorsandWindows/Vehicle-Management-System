@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import type { Profile } from '../types';
@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const eventCounterRef = useRef(0);
 
   useEffect(() => {
     let active = true;
@@ -35,8 +36,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      const eventCounter = ++eventCounterRef.current;
       setSession(newSession);
-      setProfile(newSession ? await loadProfile(newSession.user.id) : null);
+      if (newSession) {
+        const profile = await loadProfile(newSession.user.id);
+        if (!active || eventCounterRef.current !== eventCounter) return;
+        setProfile(profile);
+      } else {
+        if (!active) return;
+        setProfile(null);
+      }
     });
 
     return () => {
