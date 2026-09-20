@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { fetchProfiles, updateProfileRole, setProfileActive } from '../api/profiles';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 import type { Profile } from '../types';
 
 export function ManageUsers() {
+  const { profile: currentProfile } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'viewer'>('viewer');
@@ -95,36 +97,48 @@ export function ManageUsers() {
           </tr>
         </thead>
         <tbody>
-          {profiles.map((p) => (
-            <tr key={p.id} className="border-b border-oryx-silver">
-              <td className="py-2">{p.email}</td>
-              <td className="py-2">
-                <select
-                  value={p.role}
-                  onChange={async (e) => {
-                    await updateProfileRole(p.id, e.target.value as 'admin' | 'viewer');
-                    await reload();
-                  }}
-                  className="border border-oryx-silver rounded px-2 py-1"
-                >
-                  <option value="viewer">Viewer</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </td>
-              <td className="py-2">{p.active ? 'Active' : 'Inactive'}</td>
-              <td className="py-2">
-                <button
-                  onClick={async () => {
-                    await setProfileActive(p.id, !p.active);
-                    await reload();
-                  }}
-                  className="underline text-oryx-blue"
-                >
-                  {p.active ? 'Deactivate' : 'Reactivate'}
-                </button>
-              </td>
-            </tr>
-          ))}
+          {profiles.map((p) => {
+            const isSelf = p.id === currentProfile?.id;
+            return (
+              <tr key={p.id} className="border-b border-oryx-silver">
+                <td className="py-2">{p.email}</td>
+                <td className="py-2">
+                  <select
+                    value={p.role}
+                    disabled={isSelf}
+                    title={isSelf ? "You can't change your own access here" : undefined}
+                    onChange={async (e) => {
+                      await updateProfileRole(p.id, e.target.value as 'admin' | 'viewer');
+                      await reload();
+                    }}
+                    className="border border-oryx-silver rounded px-2 py-1 disabled:opacity-50"
+                  >
+                    <option value="viewer">Viewer</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </td>
+                <td className="py-2">{p.active ? 'Active' : 'Inactive'}</td>
+                <td className="py-2">
+                  <button
+                    disabled={isSelf}
+                    title={isSelf ? "You can't change your own access here" : undefined}
+                    onClick={async () => {
+                      await setProfileActive(p.id, !p.active);
+                      await reload();
+                    }}
+                    className="underline text-oryx-blue disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
+                  >
+                    {p.active ? 'Deactivate' : 'Reactivate'}
+                  </button>
+                  {isSelf && (
+                    <span className="ml-2 text-xs text-oryx-silver">
+                      You can't change your own access here
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
