@@ -2,6 +2,15 @@ import type { SystemCategory } from '../../scripts/import/categorize';
 
 export type { SystemCategory };
 
+export interface Profile {
+  id: string;
+  email: string;
+  role: 'admin' | 'viewer';
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Vehicle {
   id: string;
   plate_no: string;
