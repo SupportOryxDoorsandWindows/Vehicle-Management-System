@@ -11,6 +11,7 @@ const MODEL_IMAGE_RULES: Array<{ keywords: string[]; file: string }> = [
   { keywords: ['hiace'], file: 'oryx-van.png' },
   { keywords: ['ranger'], file: 'ford-ranger.png' },
   { keywords: ['escape'], file: 'ford-escape.png' },
+  { keywords: ['fortuner'], file: 'toyota-fortuner.png' },
 ];
 
 /** Returns a representative stock image path for the vehicle's model, or null if none is mapped. */
