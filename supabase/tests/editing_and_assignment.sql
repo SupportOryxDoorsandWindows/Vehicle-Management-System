@@ -1,4 +1,4 @@
--- Behaviour checks for migration 0004 (see supabase_stub.sql for how to run).
+-- Behaviour checks for migrations 0004 and 0005 (see supabase_stub.sql for how to run).
 -- Each block raises on the first unmet expectation.
 -- Seed (as table owner)
 insert into auth.users values ('00000000-0000-0000-0000-00000000000a'), ('00000000-0000-0000-0000-00000000000b');
