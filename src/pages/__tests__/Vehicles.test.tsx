@@ -7,6 +7,8 @@ import * as vehiclesApi from '../../api/vehicles';
 import * as expensesApi from '../../api/expenses';
 import type { Vehicle, Expense } from '../../types';
 
+vi.mock('../../lib/useIsAdmin', () => ({ useIsAdmin: vi.fn(() => false) }));
+
 const vehicles: Vehicle[] = [
   { id: 'v1', plate_no: 'U 67931', brand: 'Ford', model: 'Ranger 2021', driver: 'Ronald', department: 'Installation', vehicle_condition: 'Good', status: 'active' } as Vehicle,
   { id: 'v2', plate_no: 'CC 16257', brand: 'Toyota', model: 'Prado 2022', driver: 'Mark', department: 'Installation', vehicle_condition: 'Good', status: 'active' } as Vehicle,

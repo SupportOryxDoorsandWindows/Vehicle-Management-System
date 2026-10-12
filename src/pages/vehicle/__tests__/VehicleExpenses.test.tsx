@@ -4,6 +4,9 @@ import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { VehicleExpenses } from '../VehicleExpenses';
 import * as expensesApi from '../../../api/expenses';
 import type { Vehicle, Expense } from '../../../types';
+import { useIsAdmin } from '../../../lib/useIsAdmin';
+
+vi.mock('../../../lib/useIsAdmin', () => ({ useIsAdmin: vi.fn(() => false) }));
 
 const vehicle: Vehicle = { id: 'v1' } as Vehicle;
 const expenses: Expense[] = [
@@ -16,6 +19,7 @@ function TestOutlet() {
 }
 
 beforeEach(() => {
+  vi.mocked(useIsAdmin).mockReturnValue(false);
   vi.spyOn(expensesApi, 'fetchExpensesByVehicle').mockResolvedValue(expenses);
 });
 
@@ -53,5 +57,37 @@ describe('VehicleExpenses tab', () => {
     }
     expect(screen.queryByText('Vehicle Insurance')).not.toBeInTheDocument();
     expect(screen.getByText('Toolbox')).toBeInTheDocument();
+  });
+});
+
+describe('VehicleExpenses tab admin controls', () => {
+  function renderTab() {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<TestOutlet />}>
+            <Route index element={<VehicleExpenses />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+  }
+
+  it('hides Add and Edit from a Viewer', async () => {
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Vehicle Insurance')).toBeInTheDocument());
+    expect(screen.queryByRole('link', { name: /add expense/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument();
+  });
+
+  it('shows an Admin Add (preset to this vehicle) and per-row Edit links', async () => {
+    vi.mocked(useIsAdmin).mockReturnValue(true);
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Vehicle Insurance')).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: /add expense/i })).toHaveAttribute('href', '/expenses/new?vehicle=v1');
+    expect(screen.getAllByRole('link', { name: 'Edit' }).map((l) => l.getAttribute('href'))).toEqual([
+      '/expenses/e1/edit',
+      '/expenses/e2/edit',
+    ]);
   });
 });

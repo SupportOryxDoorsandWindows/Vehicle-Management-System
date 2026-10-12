@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { fetchExpensesByVehicle } from '../../api/expenses';
 import { formatAED } from '../../lib/format';
 import { LoadError } from '../../components/LoadError';
 import { useLoad } from '../../lib/useLoad';
+import { useIsAdmin } from '../../lib/useIsAdmin';
 import type { Vehicle, Expense } from '../../types';
 
 const NO_EXPENSES: Expense[] = [];
@@ -13,6 +14,7 @@ export function VehicleExpenses() {
   const { data, error } = useLoad(() => fetchExpensesByVehicle(vehicle.id), [vehicle.id]);
   const expenses = data ?? NO_EXPENSES;
   const [typeFilter, setTypeFilter] = useState('');
+  const isAdmin = useIsAdmin();
 
   const types = useMemo(
     () => Array.from(new Set(expenses.map((e) => e.type_of_expense).filter(Boolean))) as string[],
@@ -48,9 +50,19 @@ export function VehicleExpenses() {
             ))}
           </select>
         </label>
-        <p className="font-semibold text-oryx-blue">
-          Total Expenses: <span>{formatAED(total)}</span>
-        </p>
+        <div className="flex gap-4 items-center">
+          <p className="font-semibold text-oryx-blue">
+            Total Expenses: <span>{formatAED(total)}</span>
+          </p>
+          {isAdmin && (
+            <Link
+              to={`/expenses/new?vehicle=${vehicle.id}`}
+              className="bg-oryx-blue text-white rounded px-3 py-1 text-sm"
+            >
+              Add expense
+            </Link>
+          )}
+        </div>
       </div>
       <table className="w-full text-left text-sm">
         <thead>
@@ -60,6 +72,7 @@ export function VehicleExpenses() {
             <th>Description</th>
             <th>Supplier</th>
             <th>Amount</th>
+            {isAdmin && <th aria-label="Actions" />}
           </tr>
         </thead>
         <tbody>
@@ -70,6 +83,13 @@ export function VehicleExpenses() {
               <td>{e.expense_description ?? 'Not Available'}</td>
               <td>{e.supplier_name ?? 'Not Available'}</td>
               <td>{formatAED(e.cost)}</td>
+              {isAdmin && (
+                <td>
+                  <Link to={`/expenses/${e.id}/edit`} className="text-oryx-blue underline">
+                    Edit
+                  </Link>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

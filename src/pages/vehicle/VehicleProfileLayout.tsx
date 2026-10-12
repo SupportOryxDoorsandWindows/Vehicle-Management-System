@@ -4,6 +4,7 @@ import { getVehicleImagePath } from '../../lib/vehicleImage';
 import { VehiclePlaceholderImage } from '../../components/VehiclePlaceholderImage';
 import { LoadError } from '../../components/LoadError';
 import { useLoad } from '../../lib/useLoad';
+import { useIsAdmin } from '../../lib/useIsAdmin';
 
 const tabs = [
   { to: '', label: 'Overview', end: true },
@@ -17,6 +18,7 @@ const tabs = [
 export function VehicleProfileLayout() {
   const { id = '' } = useParams();
   const { data: vehicle, error } = useLoad(() => fetchVehicleById(id), [id]);
+  const isAdmin = useIsAdmin();
 
   if (error) return <LoadError what="this vehicle" message={error} />;
   if (vehicle === undefined) return <p>Loading...</p>;
@@ -55,6 +57,14 @@ export function VehicleProfileLayout() {
           <p className="text-oryx-silver">Plate: {vehicle.plate_no}</p>
           {imagePath && <p className="text-xs text-oryx-silver">Representative image, not this specific vehicle</p>}
         </div>
+        {isAdmin && (
+          <Link
+            to={`/vehicles/${vehicle.id}/edit`}
+            className="ml-auto border border-oryx-blue text-oryx-blue rounded px-3 py-1 text-sm"
+          >
+            Edit vehicle
+          </Link>
+        )}
       </div>
       <div className="flex gap-4 border-b border-oryx-silver mb-4">
         {tabs.map((tab) => (

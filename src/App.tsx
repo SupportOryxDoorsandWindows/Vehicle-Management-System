@@ -17,6 +17,8 @@ import { UnassignedExpenses } from './pages/UnassignedExpenses';
 import { Reports } from './pages/Reports';
 import { ManageUsers } from './pages/ManageUsers';
 import { SetPassword } from './pages/SetPassword';
+import { VehicleForm } from './pages/VehicleForm';
+import { ExpenseForm } from './pages/ExpenseForm';
 
 export default function App() {
   return (
@@ -33,6 +35,22 @@ export default function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/set-password" element={<SetPassword />} />
                     <Route path="/vehicles" element={<Vehicles />} />
+                    <Route
+                      path="/vehicles/new"
+                      element={
+                        <RequireAdmin>
+                          <VehicleForm />
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/vehicles/:id/edit"
+                      element={
+                        <RequireAdmin>
+                          <VehicleForm />
+                        </RequireAdmin>
+                      }
+                    />
                     <Route path="/vehicles/:id" element={<VehicleProfileLayout />}>
                       <Route index element={<Overview />} />
                       <Route path="expenses" element={<VehicleExpenses />} />
@@ -41,6 +59,22 @@ export default function App() {
                       <Route path="finance" element={<Finance />} />
                       <Route path="reports" element={<VehicleReports />} />
                     </Route>
+                    <Route
+                      path="/expenses/new"
+                      element={
+                        <RequireAdmin>
+                          <ExpenseForm />
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/expenses/:id/edit"
+                      element={
+                        <RequireAdmin>
+                          <ExpenseForm />
+                        </RequireAdmin>
+                      }
+                    />
                     <Route path="/unassigned-expenses" element={<UnassignedExpenses />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route
