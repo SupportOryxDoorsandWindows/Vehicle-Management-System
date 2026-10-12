@@ -5,6 +5,7 @@
 --     -f supabase/migrations/0002_index_expenses_vehicle_id.sql \
 --     -f supabase/migrations/0003_profiles_and_rls.sql \
 --     -f supabase/migrations/0004_editing_and_assignment.sql \
+--     -f supabase/migrations/0005_audit_written_only_by_trigger.sql \
 --     -f supabase/tests/editing_and_assignment.sql
 create schema auth;
 create table auth.users (id uuid primary key);

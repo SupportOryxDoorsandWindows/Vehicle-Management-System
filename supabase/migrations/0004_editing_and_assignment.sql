@@ -16,8 +16,8 @@ create index if not exists idx_expense_assignment_audit_expense_id
 
 -- Every change of an expense's vehicle is audited by the database itself, so
 -- no client path (form, assign button, direct API call) can skip it.
--- security definer lets the trigger write the audit row even though no
--- client role is allowed to insert into the audit table directly.
+-- security definer lets the trigger write the audit row even once no client
+-- role is allowed to insert into the audit table directly (0005).
 create function public.audit_expense_vehicle_change()
 returns trigger
 language plpgsql
@@ -40,8 +40,3 @@ create trigger expenses_audit_vehicle_change
   for each row
   when (old.vehicle_id is distinct from new.vehicle_id)
   execute function public.audit_expense_vehicle_change();
-
--- Audit rows are written only by the trigger above. Admins keep read access
--- (via the existing select policy) but can no longer insert, edit, or delete
--- history through the API.
-drop policy "Admins write audit" on public.expense_assignment_audit;
