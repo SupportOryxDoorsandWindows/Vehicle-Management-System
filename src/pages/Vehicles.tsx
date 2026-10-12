@@ -1,23 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchVehicles } from '../api/vehicles';
 import { fetchAllExpenses } from '../api/expenses';
 import { VehicleCard } from '../components/VehicleCard';
 import { formatAED } from '../lib/format';
+import { LoadError } from '../components/LoadError';
+import { useLoad } from '../lib/useLoad';
 import type { Vehicle, Expense } from '../types';
 
+const NO_VEHICLES: Vehicle[] = [];
+const NO_EXPENSES: Expense[] = [];
+
 export function Vehicles() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const { data, error } = useLoad(() => Promise.all([fetchVehicles(), fetchAllExpenses()]), []);
+  const [vehicles, expenses] = data ?? [NO_VEHICLES, NO_EXPENSES];
   const [search, setSearch] = useState('');
   const [department, setDepartment] = useState('');
   const [status, setStatus] = useState('');
   const [view, setView] = useState<'cards' | 'table'>('cards');
-
-  useEffect(() => {
-    fetchVehicles().then(setVehicles);
-    fetchAllExpenses().then(setExpenses);
-  }, []);
 
   const totalsByVehicle = useMemo(() => {
     const totals = new Map<string, number>();
@@ -44,6 +44,9 @@ export function Vehicles() {
         .some((field) => field!.toLowerCase().includes(query));
     });
   }, [vehicles, search, department, status]);
+
+  if (error) return <LoadError what="vehicles" message={error} />;
+  if (!data) return <p>Loading...</p>;
 
   return (
     <div>

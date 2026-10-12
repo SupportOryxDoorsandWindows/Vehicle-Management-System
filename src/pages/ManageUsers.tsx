@@ -1,24 +1,34 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { fetchProfiles, updateProfileRole, setProfileActive } from '../api/profiles';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import type { Profile } from '../types';
+import { useLoad, errorMessage } from '../lib/useLoad';
+import { LoadError } from '../components/LoadError';
 
 export function ManageUsers() {
   const { profile: currentProfile } = useAuth();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [reloadCount, setReloadCount] = useState(0);
+  const { data: profiles, error: loadError } = useLoad(fetchProfiles, [reloadCount]);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'viewer'>('viewer');
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
 
-  async function reload() {
-    setProfiles(await fetchProfiles());
+  function reload() {
+    setReloadCount((n) => n + 1);
   }
 
-  useEffect(() => {
+  async function changeAccess(change: () => Promise<void>) {
+    setActionError(null);
+    try {
+      await change();
+    } catch (err) {
+      setActionError(errorMessage(err));
+    }
+    // Reload either way so the table shows what was actually saved.
     reload();
-  }, []);
+  }
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault();
@@ -42,7 +52,7 @@ export function ManageUsers() {
       return;
     }
     setInviteEmail('');
-    await reload();
+    reload();
   }
 
   return (
@@ -86,61 +96,69 @@ export function ManageUsers() {
         </button>
       </form>
       {inviteError && <p className="text-red-700 text-sm mb-4">{inviteError}</p>}
+      {actionError && (
+        <p role="alert" className="text-red-700 text-sm mb-4">
+          {actionError}
+        </p>
+      )}
 
-      <table className="w-full text-left">
-        <thead>
-          <tr className="text-sm text-oryx-silver border-b border-oryx-silver">
-            <th className="py-2">Email</th>
-            <th className="py-2">Role</th>
-            <th className="py-2">Status</th>
-            <th className="py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {profiles.map((p) => {
-            const isSelf = p.id === currentProfile?.id;
-            return (
-              <tr key={p.id} className="border-b border-oryx-silver">
-                <td className="py-2">{p.email}</td>
-                <td className="py-2">
-                  <select
-                    value={p.role}
-                    disabled={isSelf}
-                    title={isSelf ? "You can't change your own access here" : undefined}
-                    onChange={async (e) => {
-                      await updateProfileRole(p.id, e.target.value as 'admin' | 'viewer');
-                      await reload();
-                    }}
-                    className="border border-oryx-silver rounded px-2 py-1 disabled:opacity-50"
-                  >
-                    <option value="viewer">Viewer</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </td>
-                <td className="py-2">{p.active ? 'Active' : 'Inactive'}</td>
-                <td className="py-2">
-                  <button
-                    disabled={isSelf}
-                    title={isSelf ? "You can't change your own access here" : undefined}
-                    onClick={async () => {
-                      await setProfileActive(p.id, !p.active);
-                      await reload();
-                    }}
-                    className="underline text-oryx-blue disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
-                  >
-                    {p.active ? 'Deactivate' : 'Reactivate'}
-                  </button>
-                  {isSelf && (
-                    <span className="ml-2 text-xs text-oryx-silver">
-                      You can't change your own access here
-                    </span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {loadError ? (
+        <LoadError what="users" message={loadError} />
+      ) : !profiles ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="w-full text-left">
+          <thead>
+            <tr className="text-sm text-oryx-silver border-b border-oryx-silver">
+              <th className="py-2">Email</th>
+              <th className="py-2">Role</th>
+              <th className="py-2">Status</th>
+              <th className="py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {profiles.map((p) => {
+              const isSelf = p.id === currentProfile?.id;
+              return (
+                <tr key={p.id} className="border-b border-oryx-silver">
+                  <td className="py-2">{p.email}</td>
+                  <td className="py-2">
+                    <select
+                      value={p.role}
+                      disabled={isSelf}
+                      title={isSelf ? "You can't change your own access here" : undefined}
+                      onChange={(e) => {
+                        const role = e.target.value as 'admin' | 'viewer';
+                        changeAccess(() => updateProfileRole(p.id, role));
+                      }}
+                      className="border border-oryx-silver rounded px-2 py-1 disabled:opacity-50"
+                    >
+                      <option value="viewer">Viewer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </td>
+                  <td className="py-2">{p.active ? 'Active' : 'Inactive'}</td>
+                  <td className="py-2">
+                    <button
+                      disabled={isSelf}
+                      title={isSelf ? "You can't change your own access here" : undefined}
+                      onClick={() => changeAccess(() => setProfileActive(p.id, !p.active))}
+                      className="underline text-oryx-blue disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
+                    >
+                      {p.active ? 'Deactivate' : 'Reactivate'}
+                    </button>
+                    {isSelf && (
+                      <span className="ml-2 text-xs text-oryx-silver">
+                        You can't change your own access here
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

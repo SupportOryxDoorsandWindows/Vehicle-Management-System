@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useParams } from 'react-router-dom';
+import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
 import { fetchVehicleById } from '../../api/vehicles';
-import type { Vehicle } from '../../types';
 import { getVehicleImagePath } from '../../lib/vehicleImage';
 import { VehiclePlaceholderImage } from '../../components/VehiclePlaceholderImage';
+import { LoadError } from '../../components/LoadError';
+import { useLoad } from '../../lib/useLoad';
 
 const tabs = [
   { to: '', label: 'Overview', end: true },
@@ -15,14 +15,22 @@ const tabs = [
 ];
 
 export function VehicleProfileLayout() {
-  const { id } = useParams();
-  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const { id = '' } = useParams();
+  const { data: vehicle, error } = useLoad(() => fetchVehicleById(id), [id]);
 
-  useEffect(() => {
-    if (id) fetchVehicleById(id).then(setVehicle);
-  }, [id]);
-
-  if (!vehicle) return <p>Loading...</p>;
+  if (error) return <LoadError what="this vehicle" message={error} />;
+  if (vehicle === undefined) return <p>Loading...</p>;
+  if (vehicle === null) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-oryx-blue mb-2">Vehicle not found</h1>
+        <p className="mb-4">This vehicle doesn't exist or may have been removed.</p>
+        <Link to="/vehicles" className="text-oryx-blue underline">
+          Back to Vehicles
+        </Link>
+      </div>
+    );
+  }
 
   const imagePath = getVehicleImagePath(vehicle.model);
 

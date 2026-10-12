@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { fetchVehicles } from '../api/vehicles';
 import { fetchAllExpenses } from '../api/expenses';
 import { formatAED } from '../lib/format';
+import { LoadError } from '../components/LoadError';
+import { useLoad } from '../lib/useLoad';
 import { ExpenseCategoryChart, type CategoryDatum } from '../components/ExpenseCategoryChart';
 import type { Vehicle, Expense, SystemCategory } from '../types';
 
 const CATEGORIES: SystemCategory[] = ['fuel', 'insurance', 'repairs', 'maintenance', 'registration', 'finance', 'other'];
 
-export function Reports() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [department, setDepartment] = useState('');
+const NO_VEHICLES: Vehicle[] = [];
+const NO_EXPENSES: Expense[] = [];
 
-  useEffect(() => {
-    fetchVehicles().then(setVehicles);
-    fetchAllExpenses().then(setExpenses);
-  }, []);
+export function Reports() {
+  const { data, error } = useLoad(() => Promise.all([fetchVehicles(), fetchAllExpenses()]), []);
+  const [vehicles, expenses] = data ?? [NO_VEHICLES, NO_EXPENSES];
+  const [department, setDepartment] = useState('');
 
   const departments = useMemo(
     () => Array.from(new Set(vehicles.map((v) => v.department).filter(Boolean))) as string[],
@@ -31,6 +31,9 @@ export function Reports() {
     if (!vehicleIdsInDepartment) return expenses;
     return expenses.filter((e) => e.vehicle_id && vehicleIdsInDepartment.has(e.vehicle_id));
   }, [expenses, vehicleIdsInDepartment]);
+
+  if (error) return <LoadError what="reports" message={error} />;
+  if (!data) return <p>Loading...</p>;
 
   const totalFleetExpenses = filteredExpenses.reduce((sum, e) => sum + (e.cost ?? 0), 0);
   const unassignedTotal = expenses
