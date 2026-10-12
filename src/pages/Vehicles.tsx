@@ -6,6 +6,7 @@ import { VehicleCard } from '../components/VehicleCard';
 import { formatAED } from '../lib/format';
 import { LoadError } from '../components/LoadError';
 import { useLoad } from '../lib/useLoad';
+import { useIsAdmin } from '../lib/useIsAdmin';
 import type { Vehicle, Expense } from '../types';
 
 const NO_VEHICLES: Vehicle[] = [];
@@ -18,6 +19,7 @@ export function Vehicles() {
   const [department, setDepartment] = useState('');
   const [status, setStatus] = useState('');
   const [view, setView] = useState<'cards' | 'table'>('cards');
+  const isAdmin = useIsAdmin();
 
   const totalsByVehicle = useMemo(() => {
     const totals = new Map<string, number>();
@@ -52,13 +54,20 @@ export function Vehicles() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-oryx-blue">Vehicles</h1>
-        <button
-          type="button"
-          onClick={() => setView(view === 'cards' ? 'table' : 'cards')}
-          className="border border-oryx-silver rounded px-3 py-1 text-sm"
-        >
-          {view === 'cards' ? 'Table View' : 'Card View'}
-        </button>
+        <div className="flex gap-3 items-center">
+          {isAdmin && (
+            <Link to="/vehicles/new" className="bg-oryx-blue text-white rounded px-3 py-1 text-sm">
+              Add vehicle
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => setView(view === 'cards' ? 'table' : 'cards')}
+            className="border border-oryx-silver rounded px-3 py-1 text-sm"
+          >
+            {view === 'cards' ? 'Table View' : 'Card View'}
+          </button>
+        </div>
       </div>
       <div className="flex flex-wrap gap-4 mb-4">
         <input

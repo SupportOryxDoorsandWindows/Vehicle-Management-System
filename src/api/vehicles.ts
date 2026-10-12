@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import type { Vehicle } from '../types';
+import { NOT_SAVED_MESSAGE } from './errors';
 
 export async function fetchVehicles(): Promise<Vehicle[]> {
   const { data, error } = await supabase.from('vehicles').select('*').order('plate_no');
@@ -16,4 +17,19 @@ export async function fetchVehicleById(id: string): Promise<Vehicle | null> {
   const { data, error } = await supabase.from('vehicles').select('*').eq('id', id).maybeSingle();
   if (error) throw error;
   return data as Vehicle | null;
+}
+
+export type VehicleInput = Partial<Omit<Vehicle, 'id' | 'created_at'>>;
+
+export async function createVehicle(input: VehicleInput): Promise<Vehicle> {
+  const { data, error } = await supabase.from('vehicles').insert(input).select().single();
+  if (error) throw error;
+  return data as Vehicle;
+}
+
+export async function updateVehicle(id: string, input: VehicleInput): Promise<Vehicle> {
+  const { data, error } = await supabase.from('vehicles').update(input).eq('id', id).select().maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error(NOT_SAVED_MESSAGE);
+  return data as Vehicle;
 }

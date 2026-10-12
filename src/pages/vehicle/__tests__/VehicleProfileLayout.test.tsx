@@ -5,6 +5,8 @@ import { VehicleProfileLayout } from '../VehicleProfileLayout';
 import * as vehiclesApi from '../../../api/vehicles';
 import type { Vehicle } from '../../../types';
 
+vi.mock('../../../lib/useIsAdmin', () => ({ useIsAdmin: vi.fn(() => false) }));
+
 function renderAt(path: string) {
   render(
     <MemoryRouter initialEntries={[path]}>
