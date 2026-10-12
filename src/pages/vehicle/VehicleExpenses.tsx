@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { fetchExpensesByVehicle } from '../../api/expenses';
 import { formatAED } from '../../lib/format';
+import { LoadError } from '../../components/LoadError';
+import { useLoad } from '../../lib/useLoad';
 import type { Vehicle, Expense } from '../../types';
+
+const NO_EXPENSES: Expense[] = [];
 
 export function VehicleExpenses() {
   const vehicle = useOutletContext<Vehicle>();
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const { data, error } = useLoad(() => fetchExpensesByVehicle(vehicle.id), [vehicle.id]);
+  const expenses = data ?? NO_EXPENSES;
   const [typeFilter, setTypeFilter] = useState('');
-
-  useEffect(() => {
-    fetchExpensesByVehicle(vehicle.id).then(setExpenses);
-  }, [vehicle.id]);
 
   const types = useMemo(
     () => Array.from(new Set(expenses.map((e) => e.type_of_expense).filter(Boolean))) as string[],
@@ -22,6 +23,9 @@ export function VehicleExpenses() {
     () => (typeFilter ? expenses.filter((e) => e.type_of_expense === typeFilter) : expenses),
     [expenses, typeFilter]
   );
+
+  if (error) return <LoadError what="expenses" message={error} />;
+  if (!data) return <p>Loading...</p>;
 
   const total = filtered.reduce((sum, e) => sum + (e.cost ?? 0), 0);
 

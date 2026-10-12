@@ -1,31 +1,28 @@
-import { useEffect, useMemo, useState } from 'react';
 import { fetchVehicles } from '../api/vehicles';
 import { fetchAllExpenses, fetchUnassignedExpenses } from '../api/expenses';
 import { getDocumentStatus } from '../lib/documentStatus';
 import { formatAED } from '../lib/format';
 import { SummaryTile } from '../components/SummaryTile';
+import { LoadError } from '../components/LoadError';
+import { useLoad } from '../lib/useLoad';
 import { VehicleCard } from '../components/VehicleCard';
-import type { Vehicle, Expense } from '../types';
+import type { Expense } from '../types';
 
 export function Dashboard() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [unassigned, setUnassigned] = useState<Expense[]>([]);
+  const { data, error } = useLoad(
+    () => Promise.all([fetchVehicles(), fetchAllExpenses(), fetchUnassignedExpenses()]),
+    []
+  );
 
-  useEffect(() => {
-    fetchVehicles().then(setVehicles);
-    fetchAllExpenses().then(setExpenses);
-    fetchUnassignedExpenses().then(setUnassigned);
-  }, []);
+  if (error) return <LoadError what="the dashboard" message={error} />;
+  if (!data) return <p>Loading...</p>;
+  const [vehicles, expenses, unassigned] = data;
 
-  const totalsByVehicle = useMemo(() => {
-    const totals = new Map<string, number>();
-    for (const e of expenses) {
-      if (!e.vehicle_id || e.cost == null) continue;
-      totals.set(e.vehicle_id, (totals.get(e.vehicle_id) ?? 0) + e.cost);
-    }
-    return totals;
-  }, [expenses]);
+  const totalsByVehicle = new Map<string, number>();
+  for (const e of expenses) {
+    if (!e.vehicle_id || e.cost == null) continue;
+    totalsByVehicle.set(e.vehicle_id, (totalsByVehicle.get(e.vehicle_id) ?? 0) + e.cost);
+  }
 
   const thisYear = new Date().getFullYear();
   const sumBy = (predicate: (e: Expense) => boolean) =>

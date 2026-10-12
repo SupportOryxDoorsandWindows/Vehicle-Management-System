@@ -1,20 +1,22 @@
-import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { fetchExpensesByVehicle } from '../../api/expenses';
 import { formatAED } from '../../lib/format';
-import type { Vehicle, Expense } from '../../types';
+import { LoadError } from '../../components/LoadError';
+import { useLoad } from '../../lib/useLoad';
+import type { Vehicle } from '../../types';
 
 export function Maintenance() {
   const vehicle = useOutletContext<Vehicle>();
-  const [records, setRecords] = useState<Expense[]>([]);
-
-  useEffect(() => {
-    fetchExpensesByVehicle(vehicle.id).then((expenses) =>
-      setRecords(
+  const { data: records, error } = useLoad(
+    () =>
+      fetchExpensesByVehicle(vehicle.id).then((expenses) =>
         expenses.filter((e) => e.system_category === 'maintenance' || e.system_category === 'repairs')
-      )
-    );
-  }, [vehicle.id]);
+      ),
+    [vehicle.id]
+  );
+
+  if (error) return <LoadError what="maintenance records" message={error} />;
+  if (!records) return <p>Loading...</p>;
 
   return (
     <div>

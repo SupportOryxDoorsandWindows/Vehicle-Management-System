@@ -54,7 +54,7 @@ describe('ManageUsers', () => {
         body: { email: 'new@oryxdoors.com', role: 'viewer' },
       })
     );
-    expect(profilesApi.fetchProfiles).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(profilesApi.fetchProfiles).toHaveBeenCalledTimes(2));
   });
 
   it('changes a user role via the role select', async () => {
@@ -91,5 +91,42 @@ describe('ManageUsers', () => {
 
     expect(within(otherRow).getByRole('combobox')).not.toBeDisabled();
     expect(within(otherRow).getByRole('button', { name: /deactivate/i })).not.toBeDisabled();
+  });
+
+  it('shows an error when a role change fails, and reloads the list', async () => {
+    vi.spyOn(profilesApi, 'updateProfileRole').mockRejectedValue(
+      new Error("The change wasn't saved. Your account may no longer have admin access.")
+    );
+    render(<ManageUsers />);
+    await waitFor(() => expect(screen.getByText('viewer@oryxdoors.com')).toBeInTheDocument());
+
+    const row = screen.getByText('viewer@oryxdoors.com').closest('tr')!;
+    await userEvent.selectOptions(within(row).getByRole('combobox'), 'admin');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/wasn't saved/);
+    await waitFor(() => expect(profilesApi.fetchProfiles).toHaveBeenCalledTimes(2));
+    // The select stays on the saved role rather than the attempted one.
+    expect(within(row).getByRole('combobox')).toHaveValue('viewer');
+  });
+
+  it('shows an error when deactivating fails', async () => {
+    vi.spyOn(profilesApi, 'setProfileActive').mockRejectedValue({ message: 'permission denied' });
+    render(<ManageUsers />);
+    await waitFor(() => expect(screen.getByText('viewer@oryxdoors.com')).toBeInTheDocument());
+
+    const row = screen.getByText('viewer@oryxdoors.com').closest('tr')!;
+    await userEvent.click(within(row).getByRole('button', { name: /deactivate/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('permission denied');
+  });
+
+  it('shows an error instead of an empty table when users fail to load', async () => {
+    vi.spyOn(profilesApi, 'fetchProfiles').mockRejectedValue(new Error('JWT expired'));
+    render(<ManageUsers />);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent("Couldn't load users.");
+    expect(alert).toHaveTextContent('JWT expired');
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 });

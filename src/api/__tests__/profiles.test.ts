@@ -17,19 +17,41 @@ describe('profiles API', () => {
     expect(order).toHaveBeenCalledWith('email');
   });
 
+  function mockUpdateReturning(result: { data: unknown; error: unknown }) {
+    const select = vi.fn().mockResolvedValue(result);
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    vi.mocked(supabase.from).mockReturnValue({ update } as never);
+    return { update, eq };
+  }
+
   it('updates a profile role', async () => {
-    const eq = vi.fn().mockResolvedValue({ error: null });
-    vi.mocked(supabase.from).mockReturnValue({ update: () => ({ eq }) } as never);
+    const { update, eq } = mockUpdateReturning({ data: [{ id: 'user-1' }], error: null });
 
     await updateProfileRole('user-1', 'admin');
+    expect(update).toHaveBeenCalledWith({ role: 'admin' });
     expect(eq).toHaveBeenCalledWith('id', 'user-1');
   });
 
   it('sets a profile active/inactive', async () => {
-    const eq = vi.fn().mockResolvedValue({ error: null });
-    vi.mocked(supabase.from).mockReturnValue({ update: () => ({ eq }) } as never);
+    const { update, eq } = mockUpdateReturning({ data: [{ id: 'user-1' }], error: null });
 
     await setProfileActive('user-1', false);
+    expect(update).toHaveBeenCalledWith({ active: false });
     expect(eq).toHaveBeenCalledWith('id', 'user-1');
+  });
+
+  it('throws when RLS silently matches no rows', async () => {
+    mockUpdateReturning({ data: [], error: null });
+
+    await expect(setProfileActive('user-1', false)).rejects.toThrow(/wasn't saved/);
+  });
+
+  it('throws the Supabase error when the update fails', async () => {
+    mockUpdateReturning({ data: null, error: { message: 'permission denied' } });
+
+    await expect(updateProfileRole('user-1', 'viewer')).rejects.toMatchObject({
+      message: 'permission denied',
+    });
   });
 });

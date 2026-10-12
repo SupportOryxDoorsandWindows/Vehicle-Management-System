@@ -33,4 +33,14 @@ describe('Dashboard', () => {
     expect(within(unassignedTile).getByText('1')).toBeInTheDocument(); // Unassigned Expenses count
     expect(screen.getByText(/Ford Ranger 2021/)).toBeInTheDocument(); // Top 5 by expense
   });
+
+  it('shows an error instead of zeroed tiles when loading fails', async () => {
+    vi.spyOn(expensesApi, 'fetchAllExpenses').mockRejectedValue({ message: 'Failed to fetch' });
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent("Couldn't load the dashboard.");
+    expect(alert).toHaveTextContent('Failed to fetch');
+    expect(screen.queryByText('Total Fleet Expenses')).not.toBeInTheDocument();
+  });
 });
