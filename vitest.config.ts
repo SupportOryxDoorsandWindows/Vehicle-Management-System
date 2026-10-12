@@ -7,6 +7,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
+    // The unit suite never talks to Supabase, but importing supabaseClient
+    // calls createClient(), which throws without a URL. Placeholder values keep
+    // the suite runnable on a fresh clone with no .env.
+    env: {
+      VITE_SUPABASE_URL: 'http://localhost:54321',
+      VITE_SUPABASE_ANON_KEY: 'unit-test-anon-key',
+    },
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
