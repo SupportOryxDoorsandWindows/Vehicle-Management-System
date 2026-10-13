@@ -3,6 +3,9 @@ import { Link, useOutletContext } from 'react-router-dom';
 import { fetchExpensesByVehicle } from '../../api/expenses';
 import { fetchExpenseDocuments } from '../../api/documents';
 import { FileLink } from '../../components/DocumentSlot';
+import { ExportButton } from '../../components/ExportButtons';
+import { exportFileName } from '../../lib/exportExcel';
+import { expensesSheet } from '../../lib/exportSheets';
 import { formatAED } from '../../lib/format';
 import { LoadError } from '../../components/LoadError';
 import { useLoad } from '../../lib/useLoad';
@@ -63,6 +66,10 @@ export function VehicleExpenses() {
           </select>
         </label>
         <div className="flex gap-4 items-center">
+          <ExportButton
+            fileName={exportFileName(`${vehicle.plate_no} expenses`)}
+            sheets={() => [expensesSheet('Expenses', filtered)]}
+          />
           <p className="font-semibold text-oryx-blue">
             Total Expenses: <span>{formatAED(total)}</span>
           </p>

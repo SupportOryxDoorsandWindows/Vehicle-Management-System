@@ -3,6 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { Reports } from '../Reports';
 import * as vehiclesApi from '../../api/vehicles';
 import * as expensesApi from '../../api/expenses';
+import * as exportExcel from '../../lib/exportExcel';
+import userEventLib from '@testing-library/user-event';
 import type { Vehicle, Expense } from '../../types';
 
 const vehicles: Vehicle[] = [
@@ -32,5 +34,21 @@ describe('Reports page', () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     await userEvent.selectOptions(screen.getByLabelText(/department/i), 'Installation');
     expect(screen.getByText('AED 3,000')).toBeInTheDocument();
+  });
+
+  it('exports the report as Summary, By Category and Expenses sheets', async () => {
+    const download = vi.spyOn(exportExcel, 'downloadWorkbook').mockResolvedValue();
+    render(<Reports />);
+    await userEventLib.click(await screen.findByRole('button', { name: 'Export to Excel' }));
+    const [fileName, sheets] = download.mock.calls[0];
+    expect(fileName).toMatch(/^fleet-report-/);
+    expect(sheets.map((s) => s.name)).toEqual(['Summary', 'By Category', 'Expenses']);
+  });
+
+  it('opens the browser print dialog for Save as PDF', async () => {
+    const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+    render(<Reports />);
+    await userEventLib.click(await screen.findByRole('button', { name: 'Print / Save as PDF' }));
+    expect(print).toHaveBeenCalled();
   });
 });

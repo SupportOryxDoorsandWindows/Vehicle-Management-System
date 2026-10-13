@@ -74,13 +74,13 @@ export function VehicleProfileLayout() {
         {isAdmin && (
           <Link
             to={`/vehicles/${vehicle.id}/edit`}
-            className="ml-auto border border-oryx-blue text-oryx-blue rounded px-3 py-1 text-sm"
+            className="ml-auto border border-oryx-blue text-oryx-blue rounded px-3 py-1 text-sm print:hidden"
           >
             Edit vehicle
           </Link>
         )}
       </div>
-      <div className="flex gap-4 border-b border-oryx-silver mb-4">
+      <div className="flex gap-4 border-b border-oryx-silver mb-4 print:hidden">
         {tabs.map((tab) => (
           <NavLink
             key={tab.label}

@@ -3,6 +3,7 @@ import { fetchExpensesByVehicle } from '../../api/expenses';
 import { calculateCostOfOwnership } from '../../lib/costOfOwnership';
 import { useLoad } from '../../lib/useLoad';
 import { LoadError } from '../../components/LoadError';
+import { PrintButton } from '../../components/ExportButtons';
 import { CostOfOwnershipSummary } from '../../components/CostOfOwnershipSummary';
 import { ExpenseCategoryChart, type CategoryDatum } from '../../components/ExpenseCategoryChart';
 import { YearlyBreakdownTable } from '../../components/YearlyBreakdownTable';
@@ -36,6 +37,9 @@ export function VehicleReports() {
 
   return (
     <div>
+      <div className="flex justify-end mb-2">
+        <PrintButton />
+      </div>
       <CostOfOwnershipSummary result={result} />
       <h2 className="text-lg font-semibold text-oryx-blue mt-8 mb-2">Expenses by Category</h2>
       <ExpenseCategoryChart data={chartData} />

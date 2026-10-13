@@ -5,7 +5,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-white">
       <NavBar />
-      <main className="p-6 max-w-7xl mx-auto">{children}</main>
+      <main className="p-6 max-w-7xl mx-auto print:p-0">{children}</main>
     </div>
   );
 }

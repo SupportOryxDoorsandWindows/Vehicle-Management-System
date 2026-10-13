@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Vehicles } from '../Vehicles';
 import * as vehiclesApi from '../../api/vehicles';
 import * as expensesApi from '../../api/expenses';
+import * as exportExcel from '../../lib/exportExcel';
 import type { Vehicle, Expense } from '../../types';
 
 vi.mock('../../lib/useIsAdmin', () => ({ useIsAdmin: vi.fn(() => false) }));
@@ -60,5 +61,25 @@ describe('Vehicles page', () => {
     await userEvent.click(screen.getByRole('button', { name: /table view/i }));
     expect(screen.getByRole('table')).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: 'U 67931' })).toBeInTheDocument();
+  });
+
+  it('exports exactly the vehicles currently shown', async () => {
+    const download = vi.spyOn(exportExcel, 'downloadWorkbook').mockResolvedValue();
+    render(<MemoryRouter><Vehicles /></MemoryRouter>);
+    await waitFor(() => expect(screen.getByText(/Ford Ranger 2021/)).toBeInTheDocument());
+    await userEvent.type(screen.getByPlaceholderText(/search/i), 'Prado');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Export to Excel' }));
+
+    const [fileName, sheets] = download.mock.calls[0];
+    expect(fileName).toMatch(/^vehicles-\d{4}-\d{2}-\d{2}\.xlsx$/);
+    expect(sheets[0].rows.map((r) => r[0])).toEqual(['CC 16257']);
+  });
+
+  it('shows why an export failed', async () => {
+    vi.spyOn(exportExcel, 'downloadWorkbook').mockRejectedValue(new Error('Blob not supported'));
+    render(<MemoryRouter><Vehicles /></MemoryRouter>);
+    await userEvent.click(await screen.findByRole('button', { name: 'Export to Excel' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Export failed: Blob not supported');
   });
 });
