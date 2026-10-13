@@ -111,3 +111,31 @@ export interface StoredDocument {
 export interface DocumentWithUrl extends StoredDocument {
   url: string | null;
 }
+
+export type ServiceKind = 'service' | 'repair' | 'tyres' | 'battery' | 'inspection' | 'reading' | 'other';
+
+/** One entry in a vehicle's service & mileage log (row in `service_records`). */
+export interface ServiceRecord {
+  id: string;
+  vehicle_id: string;
+  record_date: string;
+  kind: ServiceKind;
+  odometer_km: number | null;
+  garage: string | null;
+  description: string | null;
+  next_service_date: string | null;
+  next_service_km: number | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+/** A copy of a deleted row, kept by the database (row in `deleted_records`). */
+export interface DeletedRecord {
+  id: string;
+  table_name: 'vehicles' | 'expenses' | 'service_records';
+  record_id: string;
+  record: Record<string, unknown>;
+  /** auth user id; null for deletes made outside the app. */
+  deleted_by: string | null;
+  deleted_at: string;
+}

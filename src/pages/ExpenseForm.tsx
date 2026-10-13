@@ -1,10 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { createExpense, fetchExpenseById, updateExpense, type ExpenseInput } from '../api/expenses';
+import { createExpense, deleteExpense, fetchExpenseById, updateExpense, type ExpenseInput } from '../api/expenses';
 import { fetchVehicles } from '../api/vehicles';
 import { deriveSystemCategory } from '../../scripts/import/categorize';
 import { RecordForm } from '../components/RecordForm';
 import { LoadError } from '../components/LoadError';
+import { DeleteButton } from '../components/DeleteButton';
 import { ExpenseAttachments } from '../components/ExpenseAttachments';
 import { fromFormValues, toFormValues, type FieldErrors } from '../lib/recordForm';
 import { expenseFieldGroups } from '../lib/expenseFields';
@@ -124,6 +125,16 @@ function ExpenseEditor({
           Cancel
         </Link>
       </div>
+      {expense && (
+        <DeleteButton
+          label="Delete expense"
+          confirmMessage={`Delete ${expense.expense ? `"${expense.expense}"` : 'this expense'}? Its attachments are deleted with it. Its assignment history is kept.`}
+          onDelete={async () => {
+            await deleteExpense(expense.id);
+            navigate(listPathFor(expense.vehicle_id));
+          }}
+        />
+      )}
     </form>
   );
 }

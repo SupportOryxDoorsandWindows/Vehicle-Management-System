@@ -4,7 +4,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { Dashboard } from '../Dashboard';
 import * as vehiclesApi from '../../api/vehicles';
 import * as expensesApi from '../../api/expenses';
-import type { Vehicle, Expense } from '../../types';
+import * as serviceRecordsApi from '../../api/serviceRecords';
+import type { Vehicle, Expense, ServiceRecord } from '../../types';
 import { SettingsContext } from '../../lib/useSettings';
 
 const vehicles: Vehicle[] = [
@@ -20,6 +21,7 @@ beforeEach(() => {
   vi.spyOn(vehiclesApi, 'fetchVehicles').mockResolvedValue(vehicles);
   vi.spyOn(expensesApi, 'fetchAllExpenses').mockResolvedValue(expenses);
   vi.spyOn(expensesApi, 'fetchUnassignedExpenses').mockResolvedValue([expenses[1]]);
+  vi.spyOn(serviceRecordsApi, 'fetchAllServiceRecords').mockResolvedValue([]);
 });
 
 describe('Dashboard', () => {
@@ -66,5 +68,25 @@ describe('Dashboard', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('counts active vehicles whose next service is overdue or due soon', async () => {
+    const record = (vehicle_id: string, next_service_date: string) =>
+      ({ id: vehicle_id, vehicle_id, record_date: '2026-01-01', kind: 'service', odometer_km: null,
+        next_service_date, next_service_km: null, created_at: '2026-01-01T00:00:00Z' }) as ServiceRecord;
+    vi.spyOn(serviceRecordsApi, 'fetchAllServiceRecords').mockResolvedValue([
+      record('v1', '2020-01-01'), // overdue
+      record('v2', '2099-01-01'), // not due
+    ]);
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+    const tile = (await screen.findByText('Services Due')).parentElement as HTMLElement;
+    expect(within(tile).getByText('1')).toBeInTheDocument();
+  });
+
+  it('still shows the dashboard when the service log fails to load', async () => {
+    vi.spyOn(serviceRecordsApi, 'fetchAllServiceRecords').mockRejectedValue(new Error('boom'));
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+    const tile = (await screen.findByText('Services Due')).parentElement as HTMLElement;
+    expect(within(tile).getByText('Not Available')).toBeInTheDocument();
   });
 });

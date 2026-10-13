@@ -10,6 +10,7 @@ import { VehicleProfileLayout } from './pages/vehicle/VehicleProfileLayout';
 import { Overview } from './pages/vehicle/Overview';
 import { VehicleExpenses } from './pages/vehicle/VehicleExpenses';
 import { Maintenance } from './pages/vehicle/Maintenance';
+import { ServiceRecordForm } from './pages/vehicle/ServiceRecordForm';
 import { Documents } from './pages/vehicle/Documents';
 import { Finance } from './pages/vehicle/Finance';
 import { VehicleReports } from './pages/vehicle/VehicleReports';
@@ -59,6 +60,22 @@ export default function App() {
                         <Route index element={<Overview />} />
                         <Route path="expenses" element={<VehicleExpenses />} />
                         <Route path="maintenance" element={<Maintenance />} />
+                        <Route
+                          path="maintenance/new"
+                          element={
+                            <RequireAdmin>
+                              <ServiceRecordForm />
+                            </RequireAdmin>
+                          }
+                        />
+                        <Route
+                          path="maintenance/:recordId/edit"
+                          element={
+                            <RequireAdmin>
+                              <ServiceRecordForm />
+                            </RequireAdmin>
+                          }
+                        />
                         <Route path="documents" element={<Documents />} />
                         <Route path="finance" element={<Finance />} />
                         <Route path="reports" element={<VehicleReports />} />

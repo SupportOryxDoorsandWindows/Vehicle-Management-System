@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import type { DeletedRecord } from '../types';
 
 export const HISTORY_LIMIT = 500;
 
@@ -7,6 +8,7 @@ export interface AssignmentHistoryEntry {
   assigned_at: string;
   /** auth user id as text, or 'system' for changes made outside the app. */
   assigned_by: string;
+  /** null once the expense has been deleted. */
   expense: { id: string; date: string | null; expense: string | null; cost: number | null } | null;
   previous: { id: string; plate_no: string } | null;
   assigned: { id: string; plate_no: string } | null;
@@ -26,4 +28,15 @@ export async function fetchAssignmentHistory(): Promise<AssignmentHistoryEntry[]
     .limit(HISTORY_LIMIT);
   if (error) throw error;
   return data as unknown as AssignmentHistoryEntry[];
+}
+
+/** Newest first, capped at HISTORY_LIMIT rows. Admins only (RLS). */
+export async function fetchDeletedRecords(): Promise<DeletedRecord[]> {
+  const { data, error } = await supabase
+    .from('deleted_records')
+    .select('*')
+    .order('deleted_at', { ascending: false })
+    .limit(HISTORY_LIMIT);
+  if (error) throw error;
+  return data as DeletedRecord[];
 }
