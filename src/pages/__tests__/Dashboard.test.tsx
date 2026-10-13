@@ -5,6 +5,7 @@ import { Dashboard } from '../Dashboard';
 import * as vehiclesApi from '../../api/vehicles';
 import * as expensesApi from '../../api/expenses';
 import type { Vehicle, Expense } from '../../types';
+import { SettingsContext } from '../../lib/useSettings';
 
 const vehicles: Vehicle[] = [
   { id: 'v1', plate_no: 'U 67931', brand: 'Ford', model: 'Ranger 2021', status: 'active', driver: 'Ronald', department: 'Installation', vehicle_condition: 'Good', vehicle_license_expiry_date: '2026-09-20' } as Vehicle,
@@ -42,5 +43,28 @@ describe('Dashboard', () => {
     expect(alert).toHaveTextContent("Couldn't load the dashboard.");
     expect(alert).toHaveTextContent('Failed to fetch');
     expect(screen.queryByText('Total Fleet Expenses')).not.toBeInTheDocument();
+  });
+
+  it('counts Upcoming Renewals with the configured threshold', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-01T00:00:00Z')); // v1's licence expires 2026-09-20: 19 days away
+    try {
+      const tile = async (days: number) => {
+        const { unmount } = render(
+          <SettingsContext.Provider value={{ expiringSoonDays: days, reload: () => {} }}>
+            <MemoryRouter><Dashboard /></MemoryRouter>
+          </SettingsContext.Provider>
+        );
+        const value = within(
+          (await screen.findByText('Upcoming Renewals')).parentElement as HTMLElement
+        ).getByText(/^\d+$/).textContent;
+        unmount();
+        return value;
+      };
+      expect(await tile(30)).toBe('1');
+      expect(await tile(14)).toBe('0');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

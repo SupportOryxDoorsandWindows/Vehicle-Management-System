@@ -7,6 +7,7 @@ import { LoadError } from '../../components/LoadError';
 import { fetchVehicleDocuments, IMAGE_CONTENT_TYPES } from '../../api/documents';
 import { useDocuments } from '../../lib/useDocuments';
 import { useIsAdmin } from '../../lib/useIsAdmin';
+import { useSettings } from '../../lib/useSettings';
 import type { DocumentKind, Vehicle } from '../../types';
 
 const DOCUMENT_ROWS: { label: string; kind: DocumentKind; expiryField: keyof Vehicle | null }[] = [
@@ -19,6 +20,7 @@ const DOCUMENT_ROWS: { label: string; kind: DocumentKind; expiryField: keyof Veh
 export function Documents() {
   const vehicle = useOutletContext<Vehicle>();
   const isAdmin = useIsAdmin();
+  const { expiringSoonDays } = useSettings();
   const { loadError, actionError, ofKind, upload, remove } = useDocuments(
     { vehicleId: vehicle.id },
     () => fetchVehicleDocuments(vehicle.id)
@@ -51,7 +53,7 @@ export function Documents() {
                 <td className="py-2">{row.label}</td>
                 <td className="py-2">{expiry ?? 'Not Available'}</td>
                 <td className="py-2">
-                  <StatusBadge status={getDocumentStatus(expiry, asOf)} />
+                  <StatusBadge status={getDocumentStatus(expiry, asOf, expiringSoonDays)} />
                 </td>
                 <td>
                   <DocumentSlot
