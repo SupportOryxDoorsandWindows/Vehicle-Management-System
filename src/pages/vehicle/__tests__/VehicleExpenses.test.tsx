@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { VehicleExpenses } from '../VehicleExpenses';
 import * as expensesApi from '../../../api/expenses';
+import * as documentsApi from '../../../api/documents';
 import type { Vehicle, Expense } from '../../../types';
 import { useIsAdmin } from '../../../lib/useIsAdmin';
 
@@ -21,6 +22,7 @@ function TestOutlet() {
 beforeEach(() => {
   vi.mocked(useIsAdmin).mockReturnValue(false);
   vi.spyOn(expensesApi, 'fetchExpensesByVehicle').mockResolvedValue(expenses);
+  vi.spyOn(documentsApi, 'fetchExpenseDocuments').mockResolvedValue([]);
 });
 
 describe('VehicleExpenses tab', () => {
@@ -89,5 +91,39 @@ describe('VehicleExpenses tab admin controls', () => {
       '/expenses/e1/edit',
       '/expenses/e2/edit',
     ]);
+  });
+});
+
+describe('VehicleExpenses tab files', () => {
+  function renderTab() {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<TestOutlet />}>
+            <Route index element={<VehicleExpenses />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+  }
+
+  it('links each expense to its uploaded attachments', async () => {
+    vi.spyOn(documentsApi, 'fetchExpenseDocuments').mockResolvedValue([
+      { id: 'd1', expense_id: 'e2', vehicle_id: null, kind: 'invoice', file_name: 'Toolbox invoice.pdf',
+        storage_path: 'p', content_type: 'application/pdf', size_bytes: 2048, uploaded_by: 'u', uploaded_at: '',
+        url: 'https://signed.example/inv' },
+    ]);
+    renderTab();
+    const link = await screen.findByRole('link', { name: 'Toolbox invoice.pdf' });
+    expect(link.closest('tr')).toHaveTextContent('Toolbox');
+    expect(link).toHaveAttribute('href', 'https://signed.example/inv');
+    expect(documentsApi.fetchExpenseDocuments).toHaveBeenCalledWith(['e1', 'e2']);
+  });
+
+  it('still shows expenses when attachments fail to load', async () => {
+    vi.spyOn(documentsApi, 'fetchExpenseDocuments').mockRejectedValue(new Error('storage down'));
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Vehicle Insurance')).toBeInTheDocument());
+    expect(screen.getAllByText('Unavailable')).toHaveLength(2);
   });
 });

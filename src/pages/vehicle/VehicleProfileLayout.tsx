@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
 import { fetchVehicleById } from '../../api/vehicles';
+import { fetchLatestVehiclePhoto } from '../../api/documents';
 import { getVehicleImagePath } from '../../lib/vehicleImage';
 import { VehiclePlaceholderImage } from '../../components/VehiclePlaceholderImage';
 import { LoadError } from '../../components/LoadError';
@@ -17,7 +18,17 @@ const tabs = [
 
 export function VehicleProfileLayout() {
   const { id = '' } = useParams();
-  const { data: vehicle, error } = useLoad(() => fetchVehicleById(id), [id]);
+  const { data, error } = useLoad(
+    () =>
+      Promise.all([
+        fetchVehicleById(id),
+        // The photo is decoration: if it fails, fall back to the representative image.
+        fetchLatestVehiclePhoto(id).catch(() => null),
+      ]),
+    [id]
+  );
+  const vehicle = data?.[0];
+  const photo = data?.[1] ?? null;
   const isAdmin = useIsAdmin();
 
   if (error) return <LoadError what="this vehicle" message={error} />;
@@ -34,7 +45,8 @@ export function VehicleProfileLayout() {
     );
   }
 
-  const imagePath = getVehicleImagePath(vehicle.model);
+  const photoUrl = photo?.url ?? null;
+  const imagePath = photoUrl ?? getVehicleImagePath(vehicle.model);
 
   return (
     <div>
@@ -44,7 +56,7 @@ export function VehicleProfileLayout() {
             <img
               src={imagePath}
               alt={`${vehicle.brand ?? ''} ${vehicle.model ?? ''}`}
-              className="w-full h-full object-contain p-1"
+              className={photoUrl ? 'w-full h-full object-cover rounded' : 'w-full h-full object-contain p-1'}
             />
           </div>
         ) : (
@@ -55,7 +67,9 @@ export function VehicleProfileLayout() {
             {vehicle.brand ?? 'Not Available'} {vehicle.model ?? 'Not Available'}
           </h1>
           <p className="text-oryx-silver">Plate: {vehicle.plate_no}</p>
-          {imagePath && <p className="text-xs text-oryx-silver">Representative image, not this specific vehicle</p>}
+          {imagePath && !photoUrl && (
+            <p className="text-xs text-oryx-silver">Representative image, not this specific vehicle</p>
+          )}
         </div>
         {isAdmin && (
           <Link
