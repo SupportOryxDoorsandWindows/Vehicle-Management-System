@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import path from 'node:path';
-import { readSheetAsObjects, mapRow } from '../parseExcel';
+import { readSheetAsObjects, mapRow, excelSerialToIsoDate } from '../parseExcel';
 import { VEHICLE_COLUMN_MAP, EXPENSE_COLUMN_MAP } from '../columnMaps';
 
 const VEHICLE_FILE = path.resolve(__dirname, '../../../data/source/Vehicle Report.xlsx');
@@ -35,5 +35,33 @@ describe('readSheetAsObjects + mapRow on real source files', () => {
     );
     const withBlankRemarks = rows.find((r) => r.remarks === null);
     expect(withBlankRemarks).toBeTruthy();
+  });
+});
+
+describe('dates', () => {
+  const originalTz = process.env.TZ;
+  afterEach(() => {
+    process.env.TZ = originalTz;
+  });
+
+  // The sheet displays DD 18409 as registered 24-Feb-2025, licence expiring 16-Mar-2027.
+  // The original import ran in Asia/Dubai, where reading dates as JS Dates shifted
+  // every one of them back a day.
+  for (const tz of ['Asia/Dubai', 'UTC', 'America/New_York', 'Asia/Kolkata']) {
+    it(`reads calendar dates exactly as the sheet shows them (TZ=${tz})`, () => {
+      process.env.TZ = tz;
+      const rows = readSheetAsObjects(VEHICLE_FILE, 'Vehicle_Report').map((r) =>
+        mapRow(r, VEHICLE_COLUMN_MAP)
+      );
+      const crane = rows.find((r) => String(r.plate_no).trim() === 'DD 18409');
+      expect(crane?.registration_date).toBe('2025-02-24');
+      expect(crane?.vehicle_license_expiry_date).toBe('2027-03-16');
+    });
+  }
+
+  it('converts Excel serial day numbers to ISO dates, ignoring any time of day', () => {
+    expect(excelSerialToIsoDate(45712)).toBe('2025-02-24');
+    expect(excelSerialToIsoDate(45712.99)).toBe('2025-02-24');
+    expect(excelSerialToIsoDate(25569)).toBe('1970-01-01');
   });
 });
