@@ -5,6 +5,7 @@ import { formatAED } from '../lib/format';
 import { SummaryTile } from '../components/SummaryTile';
 import { LoadError } from '../components/LoadError';
 import { useLoad } from '../lib/useLoad';
+import { useSettings } from '../lib/useSettings';
 import { VehicleCard } from '../components/VehicleCard';
 import type { Expense } from '../types';
 
@@ -13,6 +14,7 @@ export function Dashboard() {
     () => Promise.all([fetchVehicles(), fetchAllExpenses(), fetchUnassignedExpenses()]),
     []
   );
+  const { expiringSoonDays } = useSettings();
 
   if (error) return <LoadError what="the dashboard" message={error} />;
   if (!data) return <p>Loading...</p>;
@@ -36,10 +38,10 @@ export function Dashboard() {
 
   const asOf = new Date();
   const expiredDocuments = vehicles.filter(
-    (v) => getDocumentStatus(v.vehicle_license_expiry_date, asOf) === 'expired'
+    (v) => getDocumentStatus(v.vehicle_license_expiry_date, asOf, expiringSoonDays) === 'expired'
   ).length;
   const upcomingRenewals = vehicles.filter(
-    (v) => getDocumentStatus(v.vehicle_license_expiry_date, asOf) === 'expiring_soon'
+    (v) => getDocumentStatus(v.vehicle_license_expiry_date, asOf, expiringSoonDays) === 'expiring_soon'
   ).length;
 
   const top5 = [...vehicles]

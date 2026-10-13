@@ -7,8 +7,10 @@
 --     -f supabase/migrations/0004_editing_and_assignment.sql \
 --     -f supabase/migrations/0005_audit_written_only_by_trigger.sql \
 --     -f supabase/migrations/0006_document_uploads.sql \
+--     -f supabase/migrations/0007_app_settings.sql \
 --     -f supabase/tests/editing_and_assignment.sql \
---     -f supabase/tests/document_uploads.sql
+--     -f supabase/tests/document_uploads.sql \
+--     -f supabase/tests/app_settings.sql
 create schema auth;
 create table auth.users (id uuid primary key);
 -- Same source as Supabase's auth.uid(): the "sub" claim of the request's JWT.

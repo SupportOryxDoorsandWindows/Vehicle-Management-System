@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Documents } from '../Documents';
 import * as documentsApi from '../../../api/documents';
 import { useIsAdmin } from '../../../lib/useIsAdmin';
+import { SettingsContext } from '../../../lib/useSettings';
 import type { DocumentWithUrl, StoredDocument, Vehicle } from '../../../types';
 
 vi.mock('../../../lib/useIsAdmin', () => ({ useIsAdmin: vi.fn(() => false) }));
@@ -145,5 +146,24 @@ describe('Documents tab', () => {
     await userEvent.click(remove);
     expect(confirm).toHaveBeenLastCalledWith('Remove Registration Card.pdf?');
     expect(documentsApi.removeDocument).toHaveBeenCalledWith(uploaded);
+  });
+
+  it('uses the configured Expiring Soon threshold', async () => {
+    // License expires 2026-10-01: 11 days after the pinned date, so with a
+    // 7-day threshold it is Valid rather than Expiring Soon.
+    render(
+      <SettingsContext.Provider value={{ expiringSoonDays: 7, reload: () => {} }}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<TestOutlet />}>
+              <Route index element={<Documents />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </SettingsContext.Provider>
+    );
+    expect(within(rowFor('Vehicle License')).getByText('Valid')).toBeInTheDocument();
+    expect(screen.queryByText('Expiring Soon')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
   });
 });

@@ -19,6 +19,9 @@ import { ManageUsers } from './pages/ManageUsers';
 import { SetPassword } from './pages/SetPassword';
 import { VehicleForm } from './pages/VehicleForm';
 import { ExpenseForm } from './pages/ExpenseForm';
+import { AssignmentHistory } from './pages/AssignmentHistory';
+import { Settings } from './pages/Settings';
+import { SettingsProvider } from './contexts/SettingsProvider';
 
 export default function App() {
   return (
@@ -30,63 +33,81 @@ export default function App() {
             path="/*"
             element={
               <RequireAuth>
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/set-password" element={<SetPassword />} />
-                    <Route path="/vehicles" element={<Vehicles />} />
-                    <Route
-                      path="/vehicles/new"
-                      element={
-                        <RequireAdmin>
-                          <VehicleForm />
-                        </RequireAdmin>
-                      }
-                    />
-                    <Route
-                      path="/vehicles/:id/edit"
-                      element={
-                        <RequireAdmin>
-                          <VehicleForm />
-                        </RequireAdmin>
-                      }
-                    />
-                    <Route path="/vehicles/:id" element={<VehicleProfileLayout />}>
-                      <Route index element={<Overview />} />
-                      <Route path="expenses" element={<VehicleExpenses />} />
-                      <Route path="maintenance" element={<Maintenance />} />
-                      <Route path="documents" element={<Documents />} />
-                      <Route path="finance" element={<Finance />} />
-                      <Route path="reports" element={<VehicleReports />} />
-                    </Route>
-                    <Route
-                      path="/expenses/new"
-                      element={
-                        <RequireAdmin>
-                          <ExpenseForm />
-                        </RequireAdmin>
-                      }
-                    />
-                    <Route
-                      path="/expenses/:id/edit"
-                      element={
-                        <RequireAdmin>
-                          <ExpenseForm />
-                        </RequireAdmin>
-                      }
-                    />
-                    <Route path="/unassigned-expenses" element={<UnassignedExpenses />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route
-                      path="/users"
-                      element={
-                        <RequireAdmin>
-                          <ManageUsers />
-                        </RequireAdmin>
-                      }
-                    />
-                  </Routes>
-                </Layout>
+                <SettingsProvider>
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/set-password" element={<SetPassword />} />
+                      <Route path="/vehicles" element={<Vehicles />} />
+                      <Route
+                        path="/vehicles/new"
+                        element={
+                          <RequireAdmin>
+                            <VehicleForm />
+                          </RequireAdmin>
+                        }
+                      />
+                      <Route
+                        path="/vehicles/:id/edit"
+                        element={
+                          <RequireAdmin>
+                            <VehicleForm />
+                          </RequireAdmin>
+                        }
+                      />
+                      <Route path="/vehicles/:id" element={<VehicleProfileLayout />}>
+                        <Route index element={<Overview />} />
+                        <Route path="expenses" element={<VehicleExpenses />} />
+                        <Route path="maintenance" element={<Maintenance />} />
+                        <Route path="documents" element={<Documents />} />
+                        <Route path="finance" element={<Finance />} />
+                        <Route path="reports" element={<VehicleReports />} />
+                      </Route>
+                      <Route
+                        path="/expenses/new"
+                        element={
+                          <RequireAdmin>
+                            <ExpenseForm />
+                          </RequireAdmin>
+                        }
+                      />
+                      <Route
+                        path="/expenses/:id/edit"
+                        element={
+                          <RequireAdmin>
+                            <ExpenseForm />
+                          </RequireAdmin>
+                        }
+                      />
+                      <Route path="/unassigned-expenses" element={<UnassignedExpenses />} />
+                      <Route path="/reports" element={<Reports />} />
+                      <Route
+                        path="/history"
+                        element={
+                          <RequireAdmin>
+                            <AssignmentHistory />
+                          </RequireAdmin>
+                        }
+                      />
+                      <Route
+                        path="/settings"
+                        element={
+                          <RequireAdmin>
+                            <Settings />
+                          </RequireAdmin>
+                        }
+                      />
+                      <Route
+                        path="/users"
+                        element={
+                          <RequireAdmin>
+                            <ManageUsers />
+                          </RequireAdmin>
+                        }
+                      />
+                    </Routes>
+                  </Layout>
+                </SettingsProvider>
               </RequireAuth>
             }
           />

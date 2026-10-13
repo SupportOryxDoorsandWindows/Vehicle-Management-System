@@ -46,4 +46,23 @@ describe('NavBar', () => {
     await userEvent.click(screen.getByRole('button', { name: /log out/i }));
     expect(signOut).toHaveBeenCalled();
   });
+
+  it('shows History and Settings only to Admins', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      profile: { id: 'u1', email: 'admin@oryxdoors.com', role: 'admin', active: true },
+      signOut: vi.fn(),
+    } as never);
+    const { unmount } = render(<MemoryRouter><NavBar /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'History' })).toHaveAttribute('href', '/history');
+    expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
+    unmount();
+
+    vi.mocked(useAuth).mockReturnValue({
+      profile: { id: 'u2', email: 'viewer@oryxdoors.com', role: 'viewer', active: true },
+      signOut: vi.fn(),
+    } as never);
+    render(<MemoryRouter><NavBar /></MemoryRouter>);
+    expect(screen.queryByRole('link', { name: 'History' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument();
+  });
 });

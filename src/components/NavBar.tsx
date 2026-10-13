@@ -8,6 +8,12 @@ const links = [
   { to: '/reports', label: 'Reports' },
 ];
 
+const ADMIN_LINKS = [
+  { to: '/history', label: 'History' },
+  { to: '/settings', label: 'Settings' },
+  { to: '/users', label: 'Manage Users' },
+];
+
 export function NavBar() {
   const { profile, signOut } = useAuth();
 
@@ -26,16 +32,18 @@ export function NavBar() {
           {link.label}
         </NavLink>
       ))}
-      {profile?.role === 'admin' && (
-        <NavLink
-          to="/users"
-          className={({ isActive }) =>
-            isActive ? 'underline font-semibold' : 'opacity-80 hover:opacity-100'
-          }
-        >
-          Manage Users
-        </NavLink>
-      )}
+      {profile?.role === 'admin' &&
+        ADMIN_LINKS.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              isActive ? 'underline font-semibold' : 'opacity-80 hover:opacity-100'
+            }
+          >
+            {link.label}
+          </NavLink>
+        ))}
       <span className="ml-auto flex items-center gap-4 text-sm">
         {profile?.email}
         <button onClick={() => signOut()} className="underline opacity-80 hover:opacity-100">
