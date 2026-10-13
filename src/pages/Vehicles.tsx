@@ -7,6 +7,9 @@ import { formatAED } from '../lib/format';
 import { LoadError } from '../components/LoadError';
 import { useLoad } from '../lib/useLoad';
 import { useIsAdmin } from '../lib/useIsAdmin';
+import { ExportButton } from '../components/ExportButtons';
+import { exportFileName } from '../lib/exportExcel';
+import { vehicleRegisterSheet } from '../lib/exportSheets';
 import type { Vehicle, Expense } from '../types';
 
 const NO_VEHICLES: Vehicle[] = [];
@@ -55,6 +58,10 @@ export function Vehicles() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-oryx-blue">Vehicles</h1>
         <div className="flex gap-3 items-center">
+          <ExportButton
+            fileName={exportFileName('vehicles')}
+            sheets={() => [vehicleRegisterSheet(filtered, totalsByVehicle)]}
+          />
           {isAdmin && (
             <Link to="/vehicles/new" className="bg-oryx-blue text-white rounded px-3 py-1 text-sm">
               Add vehicle
@@ -69,7 +76,7 @@ export function Vehicles() {
           </button>
         </div>
       </div>
-      <div className="flex flex-wrap gap-4 mb-4">
+      <div className="flex flex-wrap gap-4 mb-4 print:hidden">
         <input
           type="text"
           placeholder="Search by plate, model, driver, or department"

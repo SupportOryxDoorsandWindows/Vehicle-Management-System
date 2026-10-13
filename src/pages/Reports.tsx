@@ -4,6 +4,9 @@ import { fetchAllExpenses } from '../api/expenses';
 import { formatAED } from '../lib/format';
 import { LoadError } from '../components/LoadError';
 import { useLoad } from '../lib/useLoad';
+import { ExportButton, PrintButton } from '../components/ExportButtons';
+import { exportFileName } from '../lib/exportExcel';
+import { fleetReportSheets } from '../lib/exportSheets';
 import { ExpenseCategoryChart, type CategoryDatum } from '../components/ExpenseCategoryChart';
 import type { Vehicle, Expense, SystemCategory } from '../types';
 
@@ -49,8 +52,28 @@ export function Reports() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-oryx-blue mb-4">Reports</h1>
-      <label className="text-sm block mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-oryx-blue">
+          Reports{department && <span className="text-lg font-normal"> — {department}</span>}
+        </h1>
+        <div className="flex gap-3 items-center">
+          <ExportButton
+            fileName={exportFileName(department ? `fleet report ${department}` : 'fleet report')}
+            sheets={() =>
+              fleetReportSheets({
+                department,
+                totalFleetExpenses,
+                unassignedTotal,
+                categories: chartData,
+                expenses: filteredExpenses,
+                vehicles,
+              })
+            }
+          />
+          <PrintButton />
+        </div>
+      </div>
+      <label className="text-sm block mb-4 print:hidden">
         Department{' '}
         <select
           aria-label="Department"

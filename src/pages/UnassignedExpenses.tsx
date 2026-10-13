@@ -7,6 +7,9 @@ import { LoadError } from '../components/LoadError';
 import { errorMessage, useLoad } from '../lib/useLoad';
 import { useIsAdmin } from '../lib/useIsAdmin';
 import { vehicleOptionLabel } from '../lib/expenseFields';
+import { ExportButton } from '../components/ExportButtons';
+import { exportFileName } from '../lib/exportExcel';
+import { expensesSheet } from '../lib/exportSheets';
 import type { Expense, Vehicle } from '../types';
 
 export function UnassignedExpenses() {
@@ -32,11 +35,19 @@ export function UnassignedExpenses() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-oryx-blue">Unassigned Expenses</h1>
-        {isAdmin && (
-          <Link to="/expenses/new" className="bg-oryx-blue text-white rounded px-3 py-1 text-sm">
-            Add expense
-          </Link>
-        )}
+        <div className="flex gap-3 items-center">
+          {data && (
+            <ExportButton
+              fileName={exportFileName('unassigned expenses')}
+              sheets={() => [expensesSheet('Unassigned Expenses', data[0])]}
+            />
+          )}
+          {isAdmin && (
+            <Link to="/expenses/new" className="bg-oryx-blue text-white rounded px-3 py-1 text-sm">
+              Add expense
+            </Link>
+          )}
+        </div>
       </div>
       <p className="text-sm text-oryx-silver mb-4">
         These expense records have no vehicle number, or a vehicle number that didn't match a

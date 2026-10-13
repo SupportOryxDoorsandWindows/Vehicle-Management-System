@@ -12,7 +12,7 @@ export function NavBar() {
   const { profile, signOut } = useAuth();
 
   return (
-    <nav className="bg-oryx-blue text-white px-6 py-4 flex gap-6 items-center">
+    <nav className="bg-oryx-blue text-white px-6 py-4 flex gap-6 items-center print:hidden">
       <span className="font-bold">Oryx Vehicle Management</span>
       {links.map((link) => (
         <NavLink
