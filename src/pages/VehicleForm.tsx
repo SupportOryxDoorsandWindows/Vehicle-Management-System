@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { createVehicle, fetchVehicleById, updateVehicle, type VehicleInput } from '../api/vehicles';
+import { createVehicle, deleteVehicle, fetchVehicleById, updateVehicle, type VehicleInput } from '../api/vehicles';
+import { isStillReferenced } from '../api/deleteRow';
 import { normalizePlate } from '../../scripts/import/normalize';
 import { RecordForm } from '../components/RecordForm';
 import { LoadError } from '../components/LoadError';
+import { DeleteButton } from '../components/DeleteButton';
 import { fromFormValues, toFormValues, type FieldErrors } from '../lib/recordForm';
 import { VEHICLE_FIELD_GROUPS } from '../lib/vehicleFields';
 import { errorMessage, useLoad } from '../lib/useLoad';
@@ -90,6 +92,21 @@ function VehicleEditor({ vehicle }: { vehicle: Vehicle | null }) {
           Cancel
         </Link>
       </div>
+      {vehicle && (
+        <DeleteButton
+          label="Delete vehicle"
+          confirmMessage={`Delete ${vehicle.plate_no}? Its service records and uploaded documents are deleted with it. Only do this for a vehicle added by mistake; for a vehicle that has left the fleet, set its Status to Inactive instead.`}
+          onDelete={async () => {
+            await deleteVehicle(vehicle.id);
+            navigate('/vehicles');
+          }}
+          describeError={(err) =>
+            isStillReferenced(err)
+              ? `${vehicle.plate_no} has expenses or assignment history, so it can't be deleted. Set its Status to Inactive instead, or move its expenses to the right vehicle first.`
+              : errorMessage(err)
+          }
+        />
+      )}
     </form>
   );
 }

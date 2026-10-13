@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 import type { Vehicle } from '../types';
 import { NOT_SAVED_MESSAGE } from './errors';
+import { deleteRow } from './deleteRow';
 
 export async function fetchVehicles(): Promise<Vehicle[]> {
   const { data, error } = await supabase.from('vehicles').select('*').order('plate_no');
@@ -32,4 +33,9 @@ export async function updateVehicle(id: string, input: VehicleInput): Promise<Ve
   if (error) throw error;
   if (!data) throw new Error(NOT_SAVED_MESSAGE);
   return data as Vehicle;
+}
+
+/** Refused by the database (isStillReferenced) while the vehicle has expenses or assignment history. */
+export async function deleteVehicle(id: string): Promise<void> {
+  await deleteRow('vehicles', id);
 }

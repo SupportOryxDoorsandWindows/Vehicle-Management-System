@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 import type { Expense } from '../types';
 import { NOT_SAVED_MESSAGE } from './errors';
+import { deleteRow } from './deleteRow';
 
 export async function fetchExpensesByVehicle(vehicleId: string): Promise<Expense[]> {
   const { data, error } = await supabase
@@ -53,4 +54,9 @@ export async function updateExpense(id: string, input: ExpenseInput): Promise<Ex
 
 export async function assignExpenseToVehicle(expenseId: string, vehicleId: string): Promise<Expense> {
   return updateExpense(expenseId, { vehicle_id: vehicleId });
+}
+
+/** Its attachments are deleted with it; its assignment history stays, with the expense left blank. */
+export async function deleteExpense(id: string): Promise<void> {
+  await deleteRow('expenses', id);
 }

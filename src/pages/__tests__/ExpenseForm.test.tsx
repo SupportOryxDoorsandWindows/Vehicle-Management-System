@@ -121,4 +121,25 @@ describe('ExpenseForm', () => {
     expect(upload).toHaveBeenCalledWith({ expenseId: 'e1' }, 'invoice', file);
     expect(documentsApi.fetchExpenseDocuments).toHaveBeenCalledWith(['e1']);
   });
+
+  it('deletes an expense after confirming and returns to its list', async () => {
+    const remove = vi.spyOn(expensesApi, 'deleteExpense').mockResolvedValue();
+    renderAt('/expenses/e1/edit');
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete expense' }));
+    expect(screen.getByText(/Delete "Staff Uniform"\? Its attachments are deleted with it/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, delete' }));
+
+    expect(await screen.findByText('Unassigned page')).toBeInTheDocument();
+    expect(remove).toHaveBeenCalledWith('e1');
+  });
+
+  it('keeps the expense and shows the error when deleting fails', async () => {
+    vi.spyOn(expensesApi, 'deleteExpense').mockRejectedValue(new Error('permission denied'));
+    renderAt('/expenses/e1/edit');
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete expense' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, delete' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('permission denied');
+    expect(screen.getByRole('button', { name: 'Delete expense' })).toBeInTheDocument();
+  });
 });

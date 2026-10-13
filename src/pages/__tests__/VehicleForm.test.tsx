@@ -23,6 +23,7 @@ function renderAt(path: string) {
         <Route path="/vehicles/new" element={<VehicleForm />} />
         <Route path="/vehicles/:id/edit" element={<VehicleForm />} />
         <Route path="/vehicles/:id" element={<p>Profile page</p>} />
+        <Route path="/vehicles" element={<p>Vehicles list</p>} />
       </Routes>
     </MemoryRouter>
   );
@@ -91,5 +92,38 @@ describe('VehicleForm', () => {
     vi.spyOn(vehiclesApi, 'fetchVehicleById').mockResolvedValue(null);
     renderAt('/vehicles/missing/edit');
     expect(await screen.findByText('Vehicle not found')).toBeInTheDocument();
+  });
+
+  it('deletes a vehicle only after confirming, then returns to the list', async () => {
+    const remove = vi.spyOn(vehiclesApi, 'deleteVehicle').mockResolvedValue();
+    renderAt('/vehicles/v1/edit');
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete vehicle' }));
+    expect(screen.getByText(/Delete U 67931\? Its service records and uploaded documents/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(remove).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete vehicle' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, delete' }));
+    expect(await screen.findByText('Vehicles list')).toBeInTheDocument();
+    expect(remove).toHaveBeenCalledWith('v1');
+  });
+
+  it('explains why a vehicle with expenses or history cannot be deleted', async () => {
+    vi.spyOn(vehiclesApi, 'deleteVehicle').mockRejectedValue({ code: '23503', message: 'violates foreign key' });
+    renderAt('/vehicles/v1/edit');
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete vehicle' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, delete' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "U 67931 has expenses or assignment history, so it can't be deleted. Set its Status to Inactive instead"
+    );
+    expect(screen.getByLabelText(/plate number/i)).toBeInTheDocument();
+  });
+
+  it('offers no delete while adding a vehicle', async () => {
+    renderAt('/vehicles/new');
+    await screen.findByLabelText(/plate number/i);
+    expect(screen.queryByRole('button', { name: 'Delete vehicle' })).not.toBeInTheDocument();
   });
 });
