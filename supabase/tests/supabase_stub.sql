@@ -8,9 +8,12 @@
 --     -f supabase/migrations/0005_audit_written_only_by_trigger.sql \
 --     -f supabase/migrations/0006_document_uploads.sql \
 --     -f supabase/migrations/0007_app_settings.sql \
+--     -f supabase/migrations/0008_driver_photos.sql \
+--     -f supabase/migrations/0009_driver_photos_stamp.sql \
 --     -f supabase/tests/editing_and_assignment.sql \
 --     -f supabase/tests/document_uploads.sql \
---     -f supabase/tests/app_settings.sql
+--     -f supabase/tests/app_settings.sql \
+--     -f supabase/tests/driver_photos.sql
 create schema auth;
 create table auth.users (id uuid primary key);
 -- Same source as Supabase's auth.uid(): the "sub" claim of the request's JWT.

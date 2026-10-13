@@ -1,19 +1,13 @@
 import { useOutletContext } from 'react-router-dom';
 import type { Vehicle } from '../../types';
 import { FieldList } from '../../components/FieldList';
-import { DriverPhoto } from '../../components/DriverPhoto';
+import { DriverPhotoPanel } from '../../components/DriverPhotoPanel';
 
 export function Overview() {
   const vehicle = useOutletContext<Vehicle>();
   return (
     <div>
-      <div className="flex items-center gap-4 mb-4">
-        <DriverPhoto driver={vehicle.driver} className="w-28 h-28 shrink-0" />
-        <div>
-          <p className="text-sm text-oryx-silver">Driver</p>
-          <p className="text-black text-lg font-medium">{vehicle.driver ?? 'Not Assigned'}</p>
-        </div>
-      </div>
+      <DriverPhotoPanel driver={vehicle.driver} />
       <FieldList
         fields={{
           'Plate Number': vehicle.plate_no,
