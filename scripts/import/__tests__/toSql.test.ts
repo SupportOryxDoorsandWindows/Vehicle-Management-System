@@ -19,8 +19,9 @@ describe('sqlValue', () => {
     // itself: new Date(y, m, d) always means midnight local time, wherever the
     // test runs, and should always format back to the same y-m-d.
     expect(sqlValue(new Date(2026, 8, 15))).toBe("'2026-09-15'");
-    // Near-midnight local time (e.g. 23:59:48, as SheetJS returns) must not
-    // roll over to the next day when converted through toISOString()/UTC.
+    // Late-evening local time stays on its own local day rather than rolling
+    // over through toISOString()/UTC. (Spreadsheet dates no longer reach this
+    // path as Dates: readSheetAsObjects converts them to "YYYY-MM-DD" strings.)
     expect(sqlValue(new Date(2026, 9, 16, 23, 59, 48))).toBe("'2026-10-16'");
   });
 });
