@@ -82,3 +82,32 @@ export interface Expense {
   system_category: SystemCategory;
   created_at: string;
 }
+
+export type DocumentKind =
+  | 'mulkiya'
+  | 'vehicle_license'
+  | 'cid_permit'
+  | 'advertisement_permit'
+  | 'vehicle_photo'
+  | 'quotation'
+  | 'invoice'
+  | 'other';
+
+/** An uploaded file (row in `documents`). Named to avoid clashing with the DOM's Document. */
+export interface StoredDocument {
+  id: string;
+  vehicle_id: string | null;
+  expense_id: string | null;
+  kind: DocumentKind;
+  storage_path: string;
+  file_name: string;
+  content_type: string | null;
+  size_bytes: number | null;
+  uploaded_by: string;
+  uploaded_at: string;
+}
+
+/** A StoredDocument plus a short-lived signed link to open it (null if signing failed). */
+export interface DocumentWithUrl extends StoredDocument {
+  url: string | null;
+}

@@ -1,18 +1,25 @@
 import { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { fetchExpensesByVehicle } from '../../api/expenses';
+import { fetchExpenseDocuments } from '../../api/documents';
+import { FileLink } from '../../components/DocumentSlot';
 import { formatAED } from '../../lib/format';
 import { LoadError } from '../../components/LoadError';
 import { useLoad } from '../../lib/useLoad';
 import { useIsAdmin } from '../../lib/useIsAdmin';
-import type { Vehicle, Expense } from '../../types';
+import type { Vehicle, Expense, DocumentWithUrl } from '../../types';
 
 const NO_EXPENSES: Expense[] = [];
 
 export function VehicleExpenses() {
   const vehicle = useOutletContext<Vehicle>();
-  const { data, error } = useLoad(() => fetchExpensesByVehicle(vehicle.id), [vehicle.id]);
-  const expenses = data ?? NO_EXPENSES;
+  const { data, error } = useLoad(async () => {
+    const expenses = await fetchExpensesByVehicle(vehicle.id);
+    // Attachments are secondary: if they fail to load, still show the expenses.
+    const documents = await fetchExpenseDocuments(expenses.map((e) => e.id)).catch(() => null);
+    return { expenses, documents };
+  }, [vehicle.id]);
+  const expenses = data?.expenses ?? NO_EXPENSES;
   const [typeFilter, setTypeFilter] = useState('');
   const isAdmin = useIsAdmin();
 
@@ -30,6 +37,11 @@ export function VehicleExpenses() {
   if (!data) return <p>Loading...</p>;
 
   const total = filtered.reduce((sum, e) => sum + (e.cost ?? 0), 0);
+  const filesByExpense = new Map<string, DocumentWithUrl[]>();
+  for (const d of data.documents ?? []) {
+    if (!d.expense_id) continue;
+    filesByExpense.set(d.expense_id, [...(filesByExpense.get(d.expense_id) ?? []), d]);
+  }
 
   return (
     <div>
@@ -72,6 +84,7 @@ export function VehicleExpenses() {
             <th>Description</th>
             <th>Supplier</th>
             <th>Amount</th>
+            <th>Files</th>
             {isAdmin && <th aria-label="Actions" />}
           </tr>
         </thead>
@@ -83,6 +96,19 @@ export function VehicleExpenses() {
               <td>{e.expense_description ?? 'Not Available'}</td>
               <td>{e.supplier_name ?? 'Not Available'}</td>
               <td>{formatAED(e.cost)}</td>
+              <td>
+                {data.documents === null ? (
+                  <span className="text-oryx-silver">Unavailable</span>
+                ) : (
+                  <ul>
+                    {(filesByExpense.get(e.id) ?? []).map((d) => (
+                      <li key={d.id}>
+                        <FileLink document={d} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </td>
               {isAdmin && (
                 <td>
                   <Link to={`/expenses/${e.id}/edit`} className="text-oryx-blue underline">

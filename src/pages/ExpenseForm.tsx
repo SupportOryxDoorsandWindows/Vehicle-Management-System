@@ -5,6 +5,7 @@ import { fetchVehicles } from '../api/vehicles';
 import { deriveSystemCategory } from '../../scripts/import/categorize';
 import { RecordForm } from '../components/RecordForm';
 import { LoadError } from '../components/LoadError';
+import { ExpenseAttachments } from '../components/ExpenseAttachments';
 import { fromFormValues, toFormValues, type FieldErrors } from '../lib/recordForm';
 import { expenseFieldGroups } from '../lib/expenseFields';
 import { errorMessage, useLoad } from '../lib/useLoad';
@@ -101,6 +102,11 @@ function ExpenseEditor({
     <form onSubmit={handleSubmit} noValidate className="max-w-4xl">
       <h1 className="text-2xl font-bold text-oryx-blue mb-4">{expense ? 'Edit Expense' : 'Add Expense'}</h1>
       <RecordForm groups={groups} values={values} errors={errors} onChange={handleChange} />
+      {expense ? (
+        <ExpenseAttachments expense={expense} />
+      ) : (
+        <p className="text-sm text-oryx-silver mb-6">You can attach a quotation or invoice once the expense is saved.</p>
+      )}
       {saveError && (
         <p role="alert" className="text-red-700 text-sm mb-4">
           {saveError}

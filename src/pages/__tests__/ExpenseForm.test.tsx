@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { ExpenseForm } from '../ExpenseForm';
 import * as expensesApi from '../../api/expenses';
 import * as vehiclesApi from '../../api/vehicles';
+import * as documentsApi from '../../api/documents';
 import type { Expense, Vehicle } from '../../types';
 
 const vehicles = [
@@ -35,6 +36,7 @@ function renderAt(path: string) {
 
 beforeEach(() => {
   vi.spyOn(vehiclesApi, 'fetchVehicles').mockResolvedValue(vehicles);
+  vi.spyOn(documentsApi, 'fetchExpenseDocuments').mockResolvedValue([]);
   vi.spyOn(expensesApi, 'fetchExpenseById').mockResolvedValue(existing);
   vi.spyOn(expensesApi, 'createExpense').mockImplementation(
     async (input) => ({ ...input, id: 'new' }) as Expense
@@ -101,5 +103,22 @@ describe('ExpenseForm', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('permission denied');
     expect(screen.getByLabelText(/^expense$/i)).toHaveValue('Staff Uniform');
+  });
+
+  it('offers attachments only once the expense exists', async () => {
+    renderAt('/expenses/new');
+    expect(await screen.findByText(/attach a quotation or invoice once the expense is saved/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Upload Invoice')).not.toBeInTheDocument();
+  });
+
+  it('lets an Admin attach an invoice to an existing expense', async () => {
+    const upload = vi.spyOn(documentsApi, 'uploadDocument').mockResolvedValue({} as never);
+    renderAt('/expenses/e1/edit');
+    const file = new File(['%PDF'], 'invoice.pdf', { type: 'application/pdf' });
+
+    await userEvent.upload(await screen.findByLabelText('Upload Invoice'), file);
+
+    expect(upload).toHaveBeenCalledWith({ expenseId: 'e1' }, 'invoice', file);
+    expect(documentsApi.fetchExpenseDocuments).toHaveBeenCalledWith(['e1']);
   });
 });
