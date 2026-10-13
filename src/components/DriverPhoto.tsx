@@ -2,11 +2,23 @@ import { useState } from 'react';
 import { getDriverImagePath } from '../lib/driverImage';
 import { DriverPlaceholderImage } from './DriverPlaceholderImage';
 
-export function DriverPhoto({ driver, className }: { driver: string | null; className?: string }) {
-  const imagePath = getDriverImagePath(driver);
-  const [failed, setFailed] = useState(false);
+/**
+ * Shows, in order of preference: an uploaded photo (photoUrl), the photo bundled
+ * with the app for this driver's name, or a placeholder.
+ */
+export function DriverPhoto({
+  driver,
+  photoUrl,
+  className,
+}: {
+  driver: string | null;
+  photoUrl?: string | null;
+  className?: string;
+}) {
+  const imagePath = photoUrl ?? getDriverImagePath(driver);
+  const [failedPath, setFailedPath] = useState<string | null>(null);
 
-  if (!imagePath || failed) {
+  if (!imagePath || failedPath === imagePath) {
     return <DriverPlaceholderImage className={className} />;
   }
 
@@ -14,7 +26,7 @@ export function DriverPhoto({ driver, className }: { driver: string | null; clas
     <img
       src={imagePath}
       alt={driver ?? 'Driver'}
-      onError={() => setFailed(true)}
+      onError={() => setFailedPath(imagePath)}
       className={`rounded-full object-cover border border-oryx-silver ${className ?? ''}`}
     />
   );
