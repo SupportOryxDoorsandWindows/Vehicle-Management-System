@@ -1,14 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Overview } from '../Overview';
-import * as driverPhotosApi from '../../../api/driverPhotos';
-import { useIsAdmin } from '../../../lib/useIsAdmin';
-import type { DriverPhotoWithUrl } from '../../../api/driverPhotos';
+import { VehicleImageContext, type VehicleImage } from '../../../lib/vehicleImageContext';
 import type { Vehicle } from '../../../types';
-
-vi.mock('../../../lib/useIsAdmin', () => ({ useIsAdmin: vi.fn(() => false) }));
 
 const vehicle: Vehicle = {
   plate_no: 'U 67931', brand: 'Ford', model: 'Ranger 2021', type_of_car: 'Pickup',
@@ -19,107 +15,67 @@ const vehicle: Vehicle = {
   remarks: null,
 } as Vehicle;
 
-const photo = {
-  id: 'p1', driver_key: 'ronald', driver_name: 'Ronald', storage_path: 'drivers/ronald/x.jpg',
-  file_name: 'ronald.jpg', url: 'https://signed.example/ronald',
-} as DriverPhotoWithUrl;
-
-function renderTab(v: Vehicle = vehicle) {
+function renderTab(image: VehicleImage = { src: '/vehicle-images/ford-ranger.png', isPhoto: false }) {
   function TestOutlet() {
-    return <Outlet context={v} />;
+    return <Outlet context={vehicle} />;
   }
   render(
-    <MemoryRouter initialEntries={['/']}>
-      <Routes>
-        <Route path="/" element={<TestOutlet />}>
-          <Route index element={<Overview />} />
-        </Route>
-      </Routes>
-    </MemoryRouter>
+    <VehicleImageContext.Provider value={image}>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<TestOutlet />}>
+            <Route index element={<Overview />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </VehicleImageContext.Provider>
   );
 }
 
-beforeEach(() => {
-  vi.mocked(useIsAdmin).mockReturnValue(false);
-  vi.spyOn(driverPhotosApi, 'fetchDriverPhoto').mockResolvedValue(null);
-  vi.spyOn(driverPhotosApi, 'uploadDriverPhoto').mockResolvedValue(photo);
-  vi.spyOn(driverPhotosApi, 'removeDriverPhoto').mockResolvedValue();
-});
+const detail = (label: string) => screen.getByText(label).nextElementSibling;
 
 describe('Overview tab', () => {
-  it('renders present fields and Not Available for empty ones', () => {
+  it('lists the details, formatted, with Not Available for empty ones', () => {
     renderTab();
-    expect(screen.getByText('Ford')).toBeInTheDocument();
-    expect(screen.getByText('Automatic')).toBeInTheDocument();
-    expect(screen.getByText('Not Available')).toBeInTheDocument(); // remarks is null
+    const details = screen.getByRole('region', { name: 'Vehicle details' });
+    expect(within(details).getByText('Ford')).toBeInTheDocument();
+    expect(detail('Registration Date')).toHaveTextContent('24 Nov 2020');
+    expect(detail('Mileage')).toHaveTextContent('316,585 KM');
+    expect(detail('Driver')).toHaveTextContent('Ronald');
+    expect(detail('Status')).toHaveTextContent('Active');
+    expect(detail('Remarks')).toHaveTextContent('Not Available');
   });
 
-  it("shows the driver's uploaded photo", async () => {
-    vi.spyOn(driverPhotosApi, 'fetchDriverPhoto').mockResolvedValue(photo);
+  it('shows the vehicle on the 360° stage, rotating until paused', async () => {
     renderTab();
-    await waitFor(() => expect(screen.getByRole('img', { name: 'Ronald' })).toHaveAttribute('src', photo.url));
-    expect(driverPhotosApi.fetchDriverPhoto).toHaveBeenCalledWith('Ronald');
+    const stage = screen.getByRole('region', { name: '360 degree vehicle view' });
+    const car = within(stage).getByRole('img', { name: 'Ford Ranger 2021, representative image' });
+    expect(car).toHaveStyle({ animationPlayState: 'running' });
+    expect(within(stage).getByRole('status')).toHaveTextContent('Auto rotating…');
+
+    await userEvent.click(within(stage).getByRole('button', { name: 'Pause rotation' }));
+    expect(within(stage).getByRole('img', { name: /Ford Ranger/ })).toHaveStyle({ animationPlayState: 'paused' });
+    expect(within(stage).getByRole('status')).toHaveTextContent('Paused');
+
+    await userEvent.click(within(stage).getByRole('button', { name: 'Resume rotation' }));
+    expect(within(stage).getByRole('status')).toHaveTextContent('Auto rotating…');
   });
 
-  it('falls back to the photo bundled with the app when none is uploaded', async () => {
-    renderTab({ ...vehicle, driver: 'Chris Dawson' });
-    await waitFor(() => expect(driverPhotosApi.fetchDriverPhoto).toHaveBeenCalled());
-    expect(screen.getByRole('img', { name: 'Chris Dawson' })).toHaveAttribute(
-      'src',
-      expect.stringContaining('driver-images/chris-dawson.png')
-    );
-  });
-
-  it('shows a Viewer no photo controls', async () => {
-    vi.spyOn(driverPhotosApi, 'fetchDriverPhoto').mockResolvedValue(photo);
+  it('stops on the front view when reset', async () => {
     renderTab();
-    await waitFor(() => expect(screen.getByRole('img', { name: 'Ronald' })).toHaveAttribute('src', photo.url));
-    expect(screen.queryByLabelText(/upload/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /remove photo/i })).not.toBeInTheDocument();
+    const stage = screen.getByRole('region', { name: '360 degree vehicle view' });
+    await userEvent.click(within(stage).getByRole('button', { name: 'Reset to front view' }));
+    expect(within(stage).getByRole('status')).toHaveTextContent('Paused');
+    expect(within(stage).getByRole('button', { name: 'Resume rotation' })).toBeInTheDocument();
   });
 
-  it('lets an Admin upload a driver photo and reloads it', async () => {
-    vi.mocked(useIsAdmin).mockReturnValue(true);
-    renderTab();
-    const file = new File(['img'], 'ronald.jpg', { type: 'image/jpeg' });
-
-    await userEvent.upload(await screen.findByLabelText('Upload driver photo'), file);
-
-    expect(driverPhotosApi.uploadDriverPhoto).toHaveBeenCalledWith('Ronald', file);
-    await waitFor(() => expect(driverPhotosApi.fetchDriverPhoto).toHaveBeenCalledTimes(2));
+  it("names an uploaded photo as the vehicle's own", () => {
+    renderTab({ src: 'https://signed/photo', isPhoto: true });
+    expect(screen.getByRole('img', { name: 'Ford Ranger 2021' })).toHaveAttribute('src', 'https://signed/photo');
   });
 
-  it('lets an Admin replace or remove an existing photo', async () => {
-    vi.mocked(useIsAdmin).mockReturnValue(true);
-    vi.spyOn(driverPhotosApi, 'fetchDriverPhoto').mockResolvedValue(photo);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    renderTab();
-
-    expect(await screen.findByLabelText('Upload new driver photo')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Remove photo' }));
-
-    expect(window.confirm).toHaveBeenCalledWith("Remove Ronald's photo?");
-    expect(driverPhotosApi.removeDriverPhoto).toHaveBeenCalledWith(photo);
-  });
-
-  it('shows why an upload failed', async () => {
-    vi.mocked(useIsAdmin).mockReturnValue(true);
-    vi.spyOn(driverPhotosApi, 'uploadDriverPhoto').mockRejectedValue(new Error('big.jpg is larger than 10 MB.'));
-    renderTab();
-
-    await userEvent.upload(
-      await screen.findByLabelText('Upload driver photo'),
-      new File(['x'], 'big.jpg', { type: 'image/jpeg' })
-    );
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('big.jpg is larger than 10 MB.');
-  });
-
-  it('offers no upload when the vehicle has no driver', () => {
-    vi.mocked(useIsAdmin).mockReturnValue(true);
-    renderTab({ ...vehicle, driver: null });
-    expect(screen.getByText('Not Assigned')).toBeInTheDocument();
-    expect(screen.queryByLabelText(/upload/i)).not.toBeInTheDocument();
-    expect(driverPhotosApi.fetchDriverPhoto).not.toHaveBeenCalled();
+  it('leaves out the stage when there is no image for the vehicle', () => {
+    renderTab({ src: null, isPhoto: false });
+    expect(screen.queryByRole('region', { name: '360 degree vehicle view' })).not.toBeInTheDocument();
   });
 });

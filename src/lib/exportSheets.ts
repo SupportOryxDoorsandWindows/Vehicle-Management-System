@@ -1,7 +1,7 @@
 import { buildSheet, type ExportColumn, type ExportSheet } from './exportExcel';
 import type { Expense, Vehicle } from '../types';
 
-const CATEGORY_LABELS: Record<string, string> = {
+export const CATEGORY_LABELS: Record<string, string> = {
   fuel: 'Fuel',
   insurance: 'Insurance',
   repairs: 'Repairs',

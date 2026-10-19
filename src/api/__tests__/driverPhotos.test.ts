@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { driverKey, removeDriverPhoto, uploadDriverPhoto, type DriverPhoto } from '../driverPhotos';
+import { driverKey, fetchDriverPhotoUrls, removeDriverPhoto, uploadDriverPhoto, type DriverPhoto } from '../driverPhotos';
 import { supabase } from '../../lib/supabaseClient';
 
 vi.mock('../../lib/supabaseClient', () => ({ supabase: { from: vi.fn(), storage: { from: vi.fn() } } }));
@@ -115,5 +115,42 @@ describe('removeDriverPhoto', () => {
     mockTable({ deleteResult: { data: [], error: null } });
     await expect(removeDriverPhoto(photo)).rejects.toThrow(/wasn't saved/);
     expect(bucket.remove).not.toHaveBeenCalled();
+  });
+});
+
+describe('fetchDriverPhotoUrls', () => {
+  it('signs every photo in one request and keys the links by driver', async () => {
+    vi.mocked(supabase.from).mockReturnValue({
+      select: async () => ({
+        data: [
+          { driver_key: 'ronald', storage_path: 'drivers/ronald/a.jpg' },
+          { driver_key: 'mark', storage_path: 'drivers/mark/b.jpg' },
+        ],
+        error: null,
+      }),
+    } as never);
+    const createSignedUrls = vi.fn(async () => ({
+      data: [
+        { path: 'drivers/ronald/a.jpg', signedUrl: 'https://signed/a', error: null },
+        { path: 'drivers/mark/b.jpg', signedUrl: 'https://signed/b', error: null },
+      ],
+      error: null,
+    }));
+    vi.mocked(supabase.storage.from).mockReturnValue({ createSignedUrls } as never);
+
+    const urls = await fetchDriverPhotoUrls();
+
+    expect(createSignedUrls).toHaveBeenCalledTimes(1);
+    expect(urls.get('ronald')).toBe('https://signed/a');
+    expect(urls.get('mark')).toBe('https://signed/b');
+  });
+
+  it('asks storage for nothing when no photo has been uploaded', async () => {
+    vi.mocked(supabase.from).mockReturnValue({ select: async () => ({ data: [], error: null }) } as never);
+    const createSignedUrls = vi.fn();
+    vi.mocked(supabase.storage.from).mockReturnValue({ createSignedUrls } as never);
+
+    expect((await fetchDriverPhotoUrls()).size).toBe(0);
+    expect(createSignedUrls).not.toHaveBeenCalled();
   });
 });

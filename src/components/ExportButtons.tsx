@@ -22,7 +22,7 @@ export function ExportButton({ fileName, sheets }: { fileName: string; sheets: (
           }
           setExporting(false);
         }}
-        className="border border-oryx-silver rounded px-3 py-1 text-sm disabled:opacity-50"
+        className="h-11 px-4 rounded-lg border border-oryx-field bg-white font-medium text-oryx-ink hover:bg-oryx-soft disabled:opacity-50"
       >
         {exporting ? 'Exporting...' : 'Export to Excel'}
       </button>
@@ -40,7 +40,7 @@ export function PrintButton() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="print:hidden border border-oryx-silver rounded px-3 py-1 text-sm"
+      className="print:hidden h-11 px-4 rounded-lg border border-oryx-field bg-white font-medium text-oryx-ink hover:bg-oryx-soft"
     >
       Print / Save as PDF
     </button>
