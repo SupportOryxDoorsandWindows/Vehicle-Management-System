@@ -3,8 +3,36 @@
 
 @layer base {
   body {
-    background-color: white;
-    color: black;
-    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    background-color: #f4f4f1;
+    color: #15191c;
+    font-family: "IBM Plex Sans", system-ui, "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+}
+
+/* Vehicle profile 360° stage: the photo sways left and right on its turntable. */
+@keyframes oryx-turn {
+  0%, 100% { transform: perspective(1400px) rotateY(-16deg); }
+  50% { transform: perspective(1400px) rotateY(16deg); }
+}
+@keyframes oryx-shadow {
+  0%, 100% { transform: translateX(-14px) scaleX(0.94); }
+  50% { transform: translateX(14px) scaleX(0.94); }
+}
+.oryx-turn {
+  animation: oryx-turn 9s ease-in-out infinite;
+  /* Start a quarter of the way in: facing straight ahead. */
+  animation-delay: -2.25s;
+  transform-origin: 50% 80%;
+}
+.oryx-shadow {
+  animation: oryx-shadow 9s ease-in-out infinite;
+  animation-delay: -2.25s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oryx-turn,
+  .oryx-shadow {
+    animation: none;
   }
 }

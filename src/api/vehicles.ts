@@ -39,3 +39,9 @@ export async function updateVehicle(id: string, input: VehicleInput): Promise<Ve
 export async function deleteVehicle(id: string): Promise<void> {
   await deleteRow('vehicles', id);
 }
+
+export async function countVehicles(): Promise<number> {
+  const { count, error } = await supabase.from('vehicles').select('id', { count: 'exact', head: true });
+  if (error) throw error;
+  return count ?? 0;
+}

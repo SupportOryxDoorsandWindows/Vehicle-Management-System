@@ -93,3 +93,25 @@ export async function removeDriverPhoto(photo: DriverPhoto): Promise<void> {
   if (!data || data.length === 0) throw new Error(NOT_SAVED_MESSAGE);
   await supabase.storage.from(DOCUMENTS_BUCKET).remove([photo.storage_path]);
 }
+
+/** Every uploaded driver photo, keyed by driverKey(), with signed links made in one request. */
+export async function fetchDriverPhotoUrls(): Promise<Map<string, string>> {
+  const { data, error } = await supabase.from('driver_photos').select('driver_key, storage_path');
+  if (error) throw error;
+  const photos = (data ?? []) as Pick<DriverPhoto, 'driver_key' | 'storage_path'>[];
+  const urls = new Map<string, string>();
+  if (photos.length === 0) return urls;
+  const { data: signed, error: signError } = await supabase.storage
+    .from(DOCUMENTS_BUCKET)
+    .createSignedUrls(
+      photos.map((p) => p.storage_path),
+      SIGNED_URL_SECONDS
+    );
+  if (signError) throw signError;
+  const byPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+  for (const p of photos) {
+    const url = byPath.get(p.storage_path);
+    if (url) urls.set(p.driver_key, url);
+  }
+  return urls;
+}

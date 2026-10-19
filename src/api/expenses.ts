@@ -60,3 +60,12 @@ export async function assignExpenseToVehicle(expenseId: string, vehicleId: strin
 export async function deleteExpense(id: string): Promise<void> {
   await deleteRow('expenses', id);
 }
+
+export async function countUnassignedExpenses(): Promise<number> {
+  const { count, error } = await supabase
+    .from('expenses')
+    .select('id', { count: 'exact', head: true })
+    .is('vehicle_id', null);
+  if (error) throw error;
+  return count ?? 0;
+}

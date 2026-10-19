@@ -18,3 +18,14 @@ export function getDriverImagePath(driver: string | null): string | null {
   if (!slug) return null;
   return `${import.meta.env.BASE_URL}driver-images/${slug}.png`;
 }
+
+/** "Ronald Abrea Samontina" -> "RA": shown in place of a photo. */
+export function driverInitials(driver: string): string {
+  return driver
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+}

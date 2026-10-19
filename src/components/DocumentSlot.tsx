@@ -23,17 +23,22 @@ export function UploadButton({
   label,
   accept = ALLOWED_CONTENT_TYPES,
   onUpload,
+  text = 'Upload',
+  className = 'inline-block border border-oryx-blue text-oryx-blue rounded px-2 py-0.5 text-xs',
 }: {
   label: string;
   accept?: string[];
   onUpload: (file: File) => Promise<void>;
+  /** What the button says; `label` names it for screen readers. */
+  text?: string;
+  className?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   return (
-    <label className="inline-block border border-oryx-blue text-oryx-blue rounded px-2 py-0.5 text-xs cursor-pointer has-[:disabled]:opacity-50">
-      {uploading ? 'Uploading...' : 'Upload'}
+    <label className={`${className} cursor-pointer has-[:disabled]:opacity-50 focus-within:outline-2 focus-within:outline-oryx-blue`}>
+      {uploading ? 'Uploading...' : text}
       <input
         ref={inputRef}
         type="file"

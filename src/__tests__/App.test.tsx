@@ -23,19 +23,21 @@ vi.mock('../api/settings', async (importOriginal) => ({
 vi.mock('../api/vehicles', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../api/vehicles')>()),
   fetchVehicles: pending(),
+  countVehicles: pending(),
 }));
 vi.mock('../api/expenses', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../api/expenses')>()),
   fetchAllExpenses: pending(),
   fetchUnassignedExpenses: pending(),
+  countUnassignedExpenses: pending(),
 }));
 
 describe('App shell', () => {
-  it('renders the nav bar with links to Dashboard, Vehicles, Unassigned Expenses, and Reports', () => {
+  it('renders the sidebar with links to Dashboard, Vehicles, To assign, and Reports', () => {
     render(<App />);
-    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /vehicles/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /unassigned expenses/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /reports/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Vehicles' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'To assign' })).toHaveAttribute('href', '/unassigned-expenses');
+    expect(screen.getByRole('link', { name: 'Reports' })).toBeInTheDocument();
   });
 });
