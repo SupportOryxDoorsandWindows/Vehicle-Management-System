@@ -23,7 +23,7 @@ export function VehicleCard({
   attention?: VehicleAttention;
   driverPhotoUrl?: string | null;
 }) {
-  const imagePath = getVehicleImagePath(vehicle.model);
+  const imagePath = getVehicleImagePath(vehicle.model, vehicle.plate_no);
   const title = `${vehicle.brand ?? 'Not Available'} ${vehicle.model ?? 'Not Available'}`;
   const pill = attention ?? (vehicle.status === 'inactive' ? INACTIVE : ACTIVE);
 
