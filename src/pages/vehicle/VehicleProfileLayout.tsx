@@ -51,7 +51,7 @@ export function VehicleProfileLayout() {
   }
 
   const photoUrl = photo?.url ?? null;
-  const imagePath = photoUrl ?? getVehicleImagePath(vehicle.model);
+  const imagePath = photoUrl ?? getVehicleImagePath(vehicle.model, vehicle.plate_no);
   const title = `${vehicle.brand ?? 'Not Available'} ${vehicle.model ?? 'Not Available'}`;
 
   return (
