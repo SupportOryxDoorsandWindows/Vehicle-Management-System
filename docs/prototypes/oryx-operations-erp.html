@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head><body>
+<title>Oryx Operations ERP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: fixed Oryx Blue sidebar + work area; one order (ORX-0418) threads through every module via a journey rail. */
+:root {
+  --bg: #F4F4F1; --surface: #FFFFFF; --surface-2: #F7F7F4; --ink: #15191C; --muted: #56626B; --faint: #6B7680;
+  --line: #E2E2DC; --divider: #F0F0EB; --accent: #022A3A; --accent-ink: #022A3A; --accent-hover: #0B4F6A; --tint: #E6EEF1;
+  --silver: #A9A9A9; --steel: #5E8A9C; --track: #EEEEE9;
+  --btn-bg: #022A3A; --btn-fg: #FFFFFF; --btn-hover: #0B4F6A;
+  --nav-bg: #022A3A; --nav-active: #0E4258; --nav-line: #1A4B60; --nav-text: #C9D6DC; --nav-muted: #8FA6B0;
+  --red: #A4231A; --red-bg: #FBE4E1; --amber: #8A4B00; --amber-bg: #FCEFD9; --green: #1C6340; --green-bg: #E1F1E7;
+  --phone: #0D1A20; --scan: #0F2630;
+  --sans: "IBM Plex Sans", system-ui, "Segoe UI", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B1418; --surface: #111D23; --surface-2: #16242B; --ink: #E5EBED; --muted: #A2B0B7; --faint: #8395A0;
+  --line: #22343C; --divider: #1A2A31; --accent: #8CC3D6; --accent-ink: #A9D4E3; --accent-hover: #B5DCE9; --tint: #15303B;
+  --silver: #6E7A80; --steel: #7FAFC1; --track: #1C2C33;
+  --btn-bg: #1C5D77; --btn-fg: #FFFFFF; --btn-hover: #24708F;
+  --nav-bg: #061D27; --nav-active: #0E3A4D; --nav-line: #15394A; --nav-text: #C9D6DC; --nav-muted: #7F98A3;
+  --red: #F0938A; --red-bg: #3A1C1A; --amber: #EBB56A; --amber-bg: #392A13; --green: #82CFA3; --green-bg: #13301F;
+  --phone: #050C10; --scan: #0B1E26; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B1418; --surface: #111D23; --surface-2: #16242B; --ink: #E5EBED; --muted: #A2B0B7; --faint: #8395A0;
+  --line: #22343C; --divider: #1A2A31; --accent: #8CC3D6; --accent-ink: #A9D4E3; --accent-hover: #B5DCE9; --tint: #15303B;
+  --silver: #6E7A80; --steel: #7FAFC1; --track: #1C2C33;
+  --btn-bg: #1C5D77; --btn-fg: #FFFFFF; --btn-hover: #24708F;
+  --nav-bg: #061D27; --nav-active: #0E3A4D; --nav-line: #15394A; --nav-text: #C9D6DC; --nav-muted: #7F98A3;
+  --red: #F0938A; --red-bg: #3A1C1A; --amber: #EBB56A; --amber-bg: #392A13; --green: #82CFA3; --green-bg: #13301F;
+  --phone: #050C10; --scan: #0B1E26; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--nav-bg); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+.num, td.r, .mono { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+td.mono { white-space: nowrap; }
+
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100%; }
+.side { background: var(--nav-bg); color: var(--nav-text); display: flex; flex-direction: column; position: sticky; top: env(safe-area-inset-top, 0px); height: calc(100vh - env(safe-area-inset-top, 0px)); padding-left: env(safe-area-inset-left, 0px); }
+.brand { padding: 22px 20px 18px; border-bottom: 1px solid var(--nav-line); }
+.brand b { display: block; color: #FFFFFF; font-size: 18px; letter-spacing: .28em; font-weight: 600; }
+.brand span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--nav-muted); }
+.nav { padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; flex: 1; }
+.nav .grp { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--nav-muted); padding: 14px 10px 6px; }
+.nav button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: var(--nav-text); padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.nav button:hover { background: var(--nav-active); color: #FFFFFF; }
+.nav button.on { background: var(--nav-active); color: #FFFFFF; box-shadow: inset 2px 0 0 var(--silver); }
+.nav .n { font-family: var(--mono); font-size: 11px; color: var(--nav-muted); width: 16px; }
+.nav .dot { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--nav-line); }
+.nav .dot.done { background: #7CC79E; } .nav .dot.cur { background: #E8B062; }
+.side-foot { padding: 14px 16px 18px; border-top: 1px solid var(--nav-line); display: grid; gap: 8px; font-size: 12px; }
+.side-foot button { background: transparent; border: 1px solid var(--nav-line); color: var(--nav-text); border-radius: 6px; padding: 7px 10px; cursor: pointer; text-align: left; }
+.side-foot button:hover { background: var(--nav-active); color: #FFFFFF; }
+.side-foot small { color: var(--nav-muted); line-height: 1.35; }
+
+.main { min-width: 0; display: flex; flex-direction: column; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); padding-block: 10px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 10px; }
+.top-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.orderchip { display: inline-flex; align-items: center; gap: 8px; background: var(--tint); color: var(--accent-ink); border-radius: 999px; padding: 4px 12px 4px 6px; font-size: 12.5px; }
+.orderchip b { background: var(--btn-bg); color: var(--btn-fg); border-radius: 999px; padding: 2px 9px; font-family: var(--mono); font-weight: 500; font-size: 12px; }
+.sample { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--amber); background: var(--amber-bg); padding: 3px 8px; border-radius: 4px; }
+.top-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.who { font-size: 12px; color: var(--muted); }
+.rail { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.rail button { flex: 1 0 auto; display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 4px 14px 4px 0; cursor: pointer; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+.rail button + button::before { content: ""; width: 18px; height: 1px; background: var(--line); margin-right: 6px; }
+.rail .st { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--silver); display: grid; place-items: center; font-size: 10px; font-family: var(--mono); flex: none; }
+.rail .done { color: var(--ink); } .rail .done .st { background: var(--green); border-color: var(--green); color: var(--surface); }
+.rail .cur { color: var(--ink); font-weight: 600; } .rail .cur .st { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+.rail .here { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--steel); }
+
+.view { padding-block: 24px 48px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 20px; max-width: 1360px; width: 100%; }
+.ph { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.ph .t { min-width: 0; flex: 1 1 420px; }
+.eyebrow { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 0 0 4px; }
+h1 { font-size: 24px; line-height: 1.2; margin: 0 0 6px; font-weight: 600; letter-spacing: -.01em; text-wrap: balance; color: var(--accent-ink); }
+h2 { font-size: 15px; margin: 0; font-weight: 600; }
+h3 { font-size: 13px; margin: 0; font-weight: 600; }
+.lede { color: var(--muted); margin: 0; max-width: 72ch; }
+.ph .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 8px 14px; cursor: pointer; font-weight: 500; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.btn:hover { border-color: var(--steel); }
+.btn.pri { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+.btn.pri:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.link { border: 0; background: none; color: var(--accent-ink); padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.card > .hd { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--divider); flex-wrap: wrap; }
+.card > .hd .sub { color: var(--faint); font-size: 12px; }
+.card > .hd .r { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.card > .bd { padding: 16px; }
+.grid { display: grid; gap: 16px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g-main { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.kpi .l { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.kpi .v { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.kpi .d { font-size: 12px; color: var(--muted); }
+.kpi.warn { box-shadow: inset 0 3px 0 var(--amber); } .kpi.bad { box-shadow: inset 0 3px 0 var(--red); } .kpi.good { box-shadow: inset 0 3px 0 var(--green); }
+
+.tw { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--surface-2); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--divider); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.r, th.r { text-align: right; white-space: nowrap; }
+tr.sel td { background: var(--tint); }
+tr.click { cursor: pointer; } tr.click:hover td { background: var(--surface-2); } tr.click.sel:hover td { background: var(--tint); }
+tfoot td { font-weight: 600; border-top: 1px solid var(--line); background: var(--surface-2); }
+.pname { font-weight: 500; }
+.psub { color: var(--faint); font-size: 12px; }
+input.mk { width: 64px; text-align: right; border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; background: var(--surface); font-variant-numeric: tabular-nums; }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 999px; white-space: nowrap; background: var(--track); color: var(--muted); }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.ok { background: var(--green-bg); color: var(--green); }
+.pill.warn { background: var(--amber-bg); color: var(--amber); }
+.pill.bad { background: var(--red-bg); color: var(--red); }
+.pill.info { background: var(--tint); color: var(--accent-ink); }
+
+.banner { display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-radius: 8px; background: var(--tint); color: var(--ink); flex-wrap: wrap; }
+.banner.warn { background: var(--amber-bg); } .banner.ok { background: var(--green-bg); }
+.banner p { margin: 0; flex: 1 1 300px; min-width: 0; }
+.ai { border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); padding: 14px 16px; display: grid; gap: 8px; }
+.ai .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--steel); }
+.ai p { margin: 0; }
+
+.flags { display: grid; gap: 10px; }
+.flag { display: grid; grid-template-columns: 4px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px 10px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.flag::before { content: ""; align-self: stretch; border-radius: 8px 0 0 8px; background: var(--amber); }
+.flag.bad::before { background: var(--red); } .flag.ok::before { background: var(--green); }
+.flag p { margin: 0; } .flag .psub { margin-top: 2px; }
+.flag .fa { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.flag select { border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; background: var(--surface); font-size: 12px; max-width: 220px; }
+
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 130px minmax(0, 1fr) 56px; gap: 10px; align-items: center; font-size: 12.5px; }
+.bar .tr { height: 10px; background: var(--track); border-radius: 3px; position: relative; overflow: hidden; }
+.bar .fl { position: absolute; inset: 0 auto 0 0; background: var(--steel); border-radius: 3px; }
+.bar .fl.hot { background: var(--red); } .bar .fl.mid { background: var(--amber); }
+.bar .cap { position: absolute; top: -3px; bottom: -3px; width: 1.5px; background: var(--ink); opacity: .5; }
+.bar .val { text-align: right; font-variant-numeric: tabular-nums; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+.pipe { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.pipe .stg { background: var(--surface-2); border-radius: 6px; padding: 10px 12px; display: grid; gap: 2px; border-top: 3px solid var(--steel); cursor: pointer; border-left: 0; border-right: 0; border-bottom: 0; text-align: left; }
+.pipe .stg:hover { background: var(--tint); }
+.pipe .stg .l { font-size: 11px; color: var(--faint); letter-spacing: .05em; text-transform: uppercase; }
+.pipe .stg .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pipe .stg .d { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pipe .stg.q { border-top-color: var(--silver); }
+
+.thread { display: grid; gap: 0; }
+.thread .row { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 7px 0; position: relative; }
+.thread .row .ic { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--silver); background: var(--surface); margin-top: 3px; position: relative; z-index: 1; }
+.thread .row:not(:last-child)::after { content: ""; position: absolute; left: 5px; top: 20px; bottom: -6px; width: 2px; background: var(--line); }
+.thread .row.done .ic { background: var(--green); border-color: var(--green); }
+.thread .row.cur .ic { background: var(--amber-bg); border-color: var(--amber); }
+.thread .doc { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+
+.alerts { display: grid; gap: 0; }
+.alert { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--divider); align-items: start; }
+.alert:last-child { border-bottom: 0; }
+.alert p { margin: 0; }
+
+.audit { display: grid; gap: 0; font-size: 12.5px; }
+.audit .e { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--divider); }
+.audit .e:last-child { border-bottom: 0; }
+.audit .tm { color: var(--faint); font-variant-numeric: tabular-nums; font-size: 12px; }
+.audit .mod { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--steel); margin-right: 6px; }
+.audit .by { color: var(--faint); }
+
+.drawer { position: fixed; inset: 0 0 0 auto; width: min(440px, 100%); background: var(--surface); border-left: 1px solid var(--line); z-index: 20; display: flex; flex-direction: column; box-shadow: -12px 0 32px rgba(2, 42, 58, .14); padding-top: env(safe-area-inset-top, 0px); padding-right: env(safe-area-inset-right, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer .hd { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+.drawer .bd { padding: 8px 20px 20px; overflow-y: auto; }
+.scrim { position: fixed; inset: 0; background: rgba(2, 20, 28, .35); z-index: 19; }
+
+.doc-prev { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 28px 32px; display: grid; gap: 18px; }
+.doc-prev .dh { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--accent); padding-bottom: 14px; }
+.doc-prev .logo { font-weight: 600; letter-spacing: .3em; font-size: 20px; color: var(--accent-ink); }
+.doc-prev dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; font-size: 12.5px; }
+.doc-prev dt { color: var(--faint); } .doc-prev dd { margin: 0; }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.steps .s { font-size: 12px; padding: 4px 10px; border-radius: 5px; background: var(--track); color: var(--muted); }
+.steps .s.done { background: var(--green-bg); color: var(--green); }
+.steps .s.cur { background: var(--amber-bg); color: var(--amber); font-weight: 600; }
+.steps .s.sub { border: 1px dashed var(--silver); }
+
+.check { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--divider); }
+.check:last-child { border-bottom: 0; }
+.check input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--btn-bg); }
+.check label { cursor: pointer; }
+.files { display: grid; gap: 8px; }
+.file { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 12.5px; }
+.file .ext { font-family: var(--mono); font-size: 10px; background: var(--tint); color: var(--accent-ink); padding: 2px 5px; border-radius: 3px; text-transform: uppercase; }
+.file .psub { margin-left: auto; }
+
+.wo { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 10px; background: var(--surface); cursor: pointer; text-align: left; }
+.wo:hover { border-color: var(--steel); }
+.wo.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.wo .top-l { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.prog { height: 6px; background: var(--track); border-radius: 3px; overflow: hidden; }
+.prog i { display: block; height: 100%; background: var(--green); }
+
+/* QR warehouse phone */
+.wh { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 20px; align-items: start; }
+.phone { background: var(--phone); border-radius: 34px; padding: 12px; width: 100%; max-width: 360px; box-shadow: 0 18px 40px rgba(2, 42, 58, .22); }
+.screen { background: var(--surface); border-radius: 24px; overflow: hidden; min-height: 600px; display: flex; flex-direction: column; }
+.sbar { display: flex; justify-content: space-between; font-size: 11px; padding: 8px 18px 4px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.apphd { background: var(--nav-bg); color: #FFFFFF; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.apphd b { font-size: 14px; }
+.modes { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.modes button { flex: none; background: transparent; border: 1px solid var(--nav-line); color: var(--nav-text); border-radius: 999px; padding: 4px 10px; font-size: 11.5px; cursor: pointer; }
+.modes button.on { background: #FFFFFF; color: #022A3A; border-color: #FFFFFF; }
+.pbody { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.pstep { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); display: flex; gap: 6px; align-items: center; }
+.pstep i { flex: 1; height: 3px; border-radius: 2px; background: var(--track); }
+.pstep i.on { background: var(--steel); }
+.viewfinder { background: var(--scan); border-radius: 14px; aspect-ratio: 4 / 3; max-width: 100%; position: relative; display: grid; place-items: center; overflow: hidden; }
+.viewfinder .corners { position: absolute; inset: 18%; border: 2px solid rgba(255, 255, 255, .0); }
+.viewfinder .corners::before, .viewfinder .corners::after { content: ""; position: absolute; width: 26px; height: 26px; border-color: #FFFFFF; border-style: solid; }
+.viewfinder .corners::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+.viewfinder .corners::after { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+.viewfinder .laser { position: absolute; left: 18%; right: 18%; height: 2px; background: #7FC4DA; top: 50%; box-shadow: 0 0 10px #7FC4DA; animation: sweep 2.4s ease-in-out infinite; }
+@keyframes sweep { 0%, 100% { top: 24%; } 50% { top: 74%; } }
+@media (prefers-reduced-motion: reduce) { .viewfinder .laser { animation: none; } }
+.viewfinder .hint { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; color: #C9D6DC; font-size: 11.5px; }
+.labels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.qlabel { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; align-items: center; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px; cursor: pointer; text-align: left; font-size: 11px; line-height: 1.25; }
+.qlabel:hover { border-color: var(--steel); }
+.qlabel .mono { font-size: 10.5px; word-break: break-all; }
+.qlabel svg { width: 40px; height: 40px; display: block; }
+.manual { display: flex; gap: 6px; }
+.manual input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; font-family: var(--mono); font-size: 12px; background: var(--surface); }
+.icard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; }
+.icard svg { width: 52px; height: 52px; }
+.field { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.field input, .field select { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--surface); font-size: 14px; color: var(--ink); }
+.perr { background: var(--red-bg); color: var(--red); border-radius: 8px; padding: 10px 12px; font-size: 12.5px; }
+.perr b { display: block; }
+.pok { text-align: center; display: grid; gap: 8px; padding: 18px 6px; }
+.pok .tick { width: 54px; height: 54px; border-radius: 50%; background: var(--green-bg); color: var(--green); display: grid; place-items: center; margin: 0 auto; font-size: 26px; font-weight: 700; }
+.wide { width: 100%; justify-content: center; padding: 11px 14px; }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 12.5px; }
+.kv dt { color: var(--faint); } .kv dd { margin: 0; }
+.muted { color: var(--muted); } .faint { color: var(--faint); }
+.note { font-size: 12px; color: var(--faint); margin: 0; }
+.stack { display: grid; gap: 16px; min-width: 0; }
+.row-gap { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.bridge svg { width: 100%; height: auto; display: block; }
+.bridge text { fill: var(--muted); font-family: var(--sans); font-size: 13px; }
+.bridge .vt { fill: var(--ink); font-weight: 600; }
+.bridge .gl { stroke: var(--divider); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--nav-bg); color: #FFFFFF; padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 30; box-shadow: 0 8px 24px rgba(0, 0, 0, .2); max-width: calc(100% - 32px); }
+
+@media (max-width: 1100px) { .g-main, .g3 { grid-template-columns: minmax(0, 1fr); } .wh { grid-template-columns: minmax(0, 1fr); justify-items: center; } .wh > .stack { width: 100%; } .pipe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 820px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; height: auto; padding-right: env(safe-area-inset-right, 0px); }
+  .brand { padding: 14px max(16px, env(safe-area-inset-left, 0px)) 10px; border: 0; display: flex; gap: 10px; align-items: baseline; }
+  .nav { flex-direction: row; overflow-x: auto; padding: 0 12px 10px; }
+  .nav .grp { display: none; }
+  .nav button { width: auto; flex: none; white-space: nowrap; }
+  .nav .dot { display: none; }
+  .side-foot { display: none; }
+  .top { position: static; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .view { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .g2 { grid-template-columns: minmax(0, 1fr); }
+  .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .doc-prev { padding: 20px 16px; }
+  .bar { grid-template-columns: 96px minmax(0, 1fr) 48px; }
+  .who { display: none; }
+}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><b>ORYX</b><span>Operations ERP · Prototype</span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <button type="button" data-act="ff">Fast-forward to production</button>
+      <button type="button" data-act="reset">Reset demo</button>
+      <small>Sample data for review. Figures are illustrative and are not Oryx actuals.</small>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div class="top-row">
+        <span class="orderchip"><b>ORX-0418</b> Private villa, Al Barari (sample)</span>
+        <span class="sample">Sample data</span>
+        <div class="top-actions">
+          <span class="who" id="who"></span>
+          <button type="button" class="btn sm" data-act="audit" id="auditBtn">Audit trail</button>
+        </div>
+      </div>
+      <div class="rail" id="rail" aria-label="Order journey"></div>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+<div id="overlay"></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Reference data (sample) ---------- */
+var TODAY = new Date(2026, 9, 21);
+var MARGIN_APPROVAL = 28, MARGIN_BLOCK = 20, LABOUR_RATE = 85, VAT = 0.05;
+
+var ITEMS = {
+  'FUS-PRO-001': { d: 'Fusion sash profile 6.5 m, RAL 7016 matt', u: 'bars', price: 214, oh: 34, al: 20, po: 0, sup: 'A', cat: 'profile' },
+  'FUS-PRO-014': { d: 'Fusion frame profile 6.5 m, RAL 7016 matt', u: 'bars', price: 248, oh: 96, al: 30, po: 0, sup: 'A', cat: 'profile' },
+  'FRE-PRO-203': { d: 'Freedom pivot frame 6.5 m, mill finish (for anodising)', u: 'bars', price: 690, oh: 0, al: 0, po: 0, sup: 'A', cat: 'profile' },
+  'GLS-DGU-28':  { d: 'DGU 6 / 16 Ar / 6 low-E, toughened', u: 'm²', price: 340, oh: 0, al: 0, po: 40, sup: 'B', cat: 'glass' },
+  'ACC-HDW-PV1': { d: 'Pivot hinge set, 300 kg rated', u: 'sets', price: 2950, oh: 2, al: 1, po: 0, sup: 'C', cat: 'acc' },
+  'ACC-HDL-110': { d: 'Lift-and-slide handle set', u: 'sets', price: 385, oh: 8, al: 2, po: 10, sup: 'C', cat: 'acc' },
+  'GSK-EPDM-09': { d: 'EPDM glazing gasket, 100 m roll', u: 'rolls', price: 410, oh: 14, al: 3, po: 0, sup: 'C', cat: 'acc' },
+  'REN-CAM-K60': { d: 'Renson Camargue pergola kit 6.0 × 4.5 m', u: 'kits', price: 46200, oh: 0, al: 0, po: 0, sup: 'R', cat: 'bulky' },
+  'REN-FIX-Z30': { d: 'Renson Fixscreen zip-screen kit 3.0 × 2.8 m', u: 'kits', price: 3650, oh: 0, al: 0, po: 0, sup: 'R', cat: 'bulky' }
+};
+var SUPPLIERS = {
+  A: { n: 'Supplier A · Profile extrusion', lead: 3, otd: 94, q: 4.6, idx: '1.00', alt: 'Supplier E: price index 0.97, on-time 81%' },
+  B: { n: 'Supplier B · Glass processing', lead: 2, otd: 91, q: 4.4, idx: '1.00', alt: 'Supplier F: price index 1.04, on-time 96%' },
+  C: { n: 'Supplier C · Hardware', lead: 2, otd: 97, q: 4.7, idx: '1.00', alt: 'No approved alternative' },
+  R: { n: 'Renson · Factory order', lead: 8, otd: 89, q: 4.8, idx: '1.00', alt: 'Single approved source' }
+};
+var LINES = [
+  { id: 'L1', name: 'Fusion lift-and-slide door', fam: 'Fusion', cfg: '4-panel, 2 sliding / 2 fixed', w: 4800, h: 2700, qty: 3, fin: 'RAL 7016 matt', gls: 'DGU 6/16Ar/6 low-E', c: { mat: 6200, gls: 3100, acc: 1450, lab: 1100, out: 0 }, mk: 60, lead: 6, path: 'Make', route: 'Fusion workstream',
+    bom: [['FUS-PRO-001', 18], ['FUS-PRO-014', 12], ['GLS-DGU-28', 38.9], ['ACC-HDL-110', 12], ['GSK-EPDM-09', 2]] },
+  { id: 'L2', name: 'Fusion casement window', fam: 'Fusion', cfg: 'Side-hung, inward opening', w: 1200, h: 1500, qty: 14, fin: 'RAL 7016 matt', gls: 'DGU 6/16Ar/6 low-E', c: { mat: 1350, gls: 780, acc: 420, lab: 310, out: 0 }, mk: 65, lead: 5, path: 'Make', route: 'Fusion workstream',
+    bom: [['FUS-PRO-001', 42], ['FUS-PRO-014', 28], ['GLS-DGU-28', 25.2], ['GSK-EPDM-09', 4]] },
+  { id: 'L3', name: 'Freedom pivot entrance door', fam: 'Freedom', cfg: 'Offset pivot, vision panel', w: 1400, h: 3000, qty: 1, fin: 'Anodised bronze', gls: 'DGU vision panel', c: { mat: 9800, gls: 1900, acc: 3600, lab: 1600, out: 2200 }, mk: 55, lead: 9, path: 'Make + subcontract', route: 'Freedom workstream · anodising subcontract',
+    bom: [['FRE-PRO-203', 2], ['GLS-DGU-28', 2.1]] },
+  { id: 'L4', name: 'Freedom fixed glazing', fam: 'Freedom', cfg: 'Floor-to-ceiling fixed light', w: 2400, h: 2700, qty: 4, fin: 'Anodised bronze', gls: 'DGU 6/16Ar/6 low-E', c: { mat: 2100, gls: 2600, acc: 180, lab: 420, out: 0 }, mk: 50, lead: 5, path: 'Make', route: 'Freedom workstream',
+    bom: [['FRE-PRO-203', 4], ['GLS-DGU-28', 25.9], ['GSK-EPDM-09', 1]] },
+  { id: 'L5', name: 'Renson Camargue pergola', fam: 'Renson', cfg: 'Louvred roof, 2 posts, LED', w: 6000, h: 4500, qty: 1, fin: 'RAL 7016 textured', gls: '—', c: { mat: 48500, gls: 0, acc: 2400, lab: 6800, out: 0 }, mk: 32, lead: 10, path: 'Buy + assemble', route: 'Procurement · Renson assembly cell',
+    bom: [['REN-CAM-K60', 1]] },
+  { id: 'L6', name: 'Renson Fixscreen zip blind', fam: 'Renson', cfg: 'Motorised, side-guided', w: 3000, h: 2800, qty: 6, fin: 'RAL 7016 textured', gls: '—', c: { mat: 3900, gls: 0, acc: 250, lab: 450, out: 0 }, mk: 45, lead: 8, path: 'Buy + assemble', route: 'Procurement · Renson assembly cell',
+    bom: [['REN-FIX-Z30', 6]] }
+];
+var CATS = [['mat', 'Material'], ['gls', 'Glass'], ['acc', 'Accessories'], ['lab', 'Labour'], ['out', 'Outsourced']];
+var FORECAST = { mat: 131560, gls: 33180, acc: 18450, lab: 22360, out: 3100 };
+var FC_WHY = { mat: 'Supplier A raised profile price 3.1% after quotation', gls: 'Two DGU units replaced after transit breakage', acc: 'On estimate', lab: 'CNC overtime and glazing-bead rework on casements', out: 'Anodising re-run on one pivot frame (colour mismatch)' };
+
+var WO_DEF = [
+  { id: 'WO-0418-01', line: 'L1', ws: 'Fusion', steps: ['Cutting', 'CNC machining', 'Assembly', 'Glazing', 'Quality check', 'Packing'], std: 66 },
+  { id: 'WO-0418-02', line: 'L2', ws: 'Fusion', steps: ['Cutting', 'CNC machining', 'Assembly', 'Glazing', 'Quality check', 'Packing'], std: 98 },
+  { id: 'WO-0418-03', line: 'L3', ws: 'Freedom', steps: ['Cutting', 'CNC machining', 'Anodising (sub)', 'Assembly', 'Glazing', 'Quality check', 'Packing'], std: 28, sub: 2 },
+  { id: 'WO-0418-04', line: 'L4', ws: 'Freedom', steps: ['Cutting', 'CNC machining', 'Assembly', 'Glazing', 'Quality check', 'Packing'], std: 24 },
+  { id: 'WO-0418-05', line: 'L5', ws: 'Renson', steps: ['Kit inspection', 'Pre-assembly', 'Quality check', 'Packing'], std: 18, also: 'L6' }
+];
+
+var LOCS = {
+  'WH-A03-R02-L04': { d: 'Profile racking · aisle A03, rack 2, level 4', type: 'WH', accepts: ['profile'] },
+  'WH-B01-R05-L01': { d: 'Glass A-frame · aisle B01, bay 5', type: 'WH', accepts: ['glass'] },
+  'WH-C02-R01-L03': { d: 'Accessories shelving · aisle C02, level 3', type: 'WH', accepts: ['acc'] },
+  'WH-D01-R01-L01': { d: 'Bulky goods floor · zone D01', type: 'WH', accepts: ['bulky', 'fg'] },
+  'PRD-LINE-A': { d: 'Production issue point · Fusion line', type: 'PRD', accepts: ['profile', 'glass', 'acc'] },
+  'DSP-BAY-02': { d: 'Dispatch bay 2', type: 'DSP', accepts: ['fg', 'bulky'] }
+};
+var UNKNOWN_LOC = 'WH-A09-R99-L09';
+var HU0 = {
+  'FUS-PRO-001-B0412': { code: 'FUS-PRO-001', d: 'Fusion sash profile 6.5 m · RAL 7016 matt', qty: 46, u: 'bars', batch: '26-1017', loc: null, st: 'On PO, not received', cat: 'profile', po: true },
+  'GLS-DGU-28-P0098': { code: 'GLS-DGU-28', d: 'DGU 6/16Ar/6 low-E · pallet of 22 units', qty: 52.1, u: 'm²', batch: 'G-26-552', loc: null, st: 'On PO, not received', cat: 'glass', po: true },
+  'FUS-PRO-014-B0388': { code: 'FUS-PRO-014', d: 'Fusion frame profile 6.5 m · RAL 7016 matt', qty: 40, u: 'bars', batch: '26-0961', loc: 'WH-A03-R02-L04', st: 'In stock', cat: 'profile' },
+  'ACC-HDL-110-C031': { code: 'ACC-HDL-110', d: 'Lift-and-slide handle set · carton of 10', qty: 10, u: 'sets', batch: 'H-2209', loc: 'WH-C02-R01-L03', st: 'In stock', cat: 'acc' },
+  'FG-0418-01': { code: 'FG-0418-01', d: 'Finished goods · Fusion lift-and-slide door ×3', qty: 3, u: 'units', batch: 'WO-0418-01', loc: null, st: 'In production', cat: 'fg', wo: 'WO-0418-01' }
+};
+var HIST0 = {
+  'FUS-PRO-014-B0388': [['02 Oct 2026 · 09:14', 'Received against PO-26-1102', '—', 'WH-A03-R02-L04', '40 bars', 'Storekeeper'], ['08 Oct 2026 · 11:40', 'Cycle count, no variance', 'WH-A03-R02-L04', 'WH-A03-R02-L04', '40 bars', 'Stock controller']],
+  'ACC-HDL-110-C031': [['29 Sep 2026 · 15:02', 'Received against PO-26-1077', '—', 'WH-C02-R01-L03', '10 sets', 'Storekeeper']]
+};
+
+/* ---------- State ---------- */
+var S;
+function fresh() {
+  S = {
+    view: 'overview', drawer: false, selLine: 'L5', selWo: 'WO-0418-01',
+    mk: {}, q: { hinge: false, glassOk: false, marginOk: {}, approved: false },
+    oc: { issued: false },
+    prf: { checks: { bom: true, fin: true, draw: false, site: false, glass: false, hw: false, dates: false }, released: false },
+    proc: { prs: false, pos: false, received: {} },
+    wo: {}, wh: { mode: 'put', step: 'item', item: null, loc: null, qty: '', cond: 'Good', err: null, last: null, sel: 'FUS-PRO-001-B0412' },
+    hu: JSON.parse(JSON.stringify(HU0)), hist: JSON.parse(JSON.stringify(HIST0)),
+    audit: [
+      ['14 Oct 2026 · 10:12', 'Estimation', 'Estimator', 'Quotation Q-2026-0418 Rev 1 created from client brief'],
+      ['16 Oct 2026 · 16:45', 'Estimation', 'Estimator', 'Rev 2: client added 6 Fixscreen zip blinds; costs recalculated'],
+      ['17 Oct 2026 · 12:20', 'Projects', 'Site surveyor', 'Site survey uploaded for ORX-0418'],
+      ['20 Oct 2026 · 09:05', 'AI check', 'System', '3 items flagged on Q-2026-0418 Rev 2 for review']
+    ]
+  };
+  LINES.forEach(function (l) { S.mk[l.id] = l.mk; });
+  WO_DEF.forEach(function (w) { S.wo[w.id] = { rel: false, step: 0, hrs: 0, issued: false, scrap: 0 }; });
+}
+
+/* ---------- Helpers ---------- */
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function n0(v) { return Math.round(v).toLocaleString('en-GB'); }
+function aed(v) { return 'AED ' + n0(v); }
+function pct(v, d) { return v.toFixed(d == null ? 1 : d) + '%'; }
+function q1(v) { return (Math.round(v * 10) / 10).toLocaleString('en-GB'); }
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function dstr(d) { return String(d.getDate()).padStart(2, '0') + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear(); }
+function addW(w) { var d = new Date(TODAY); d.setDate(d.getDate() + w * 7); return d; }
+function now() { var d = new Date(); return dstr(TODAY) + ' · ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function log(mod, who, txt) { S.audit.push([now(), mod, who, txt]); }
+function pill(cls, t) { return '<span class="pill ' + cls + '">' + esc(t) + '</span>'; }
+var toastT;
+function toast(t) {
+  var o = document.getElementById('toastEl'); if (o) o.remove();
+  var el = document.createElement('div'); el.className = 'toast'; el.id = 'toastEl'; el.setAttribute('role', 'status'); el.textContent = t;
+  document.body.appendChild(el); clearTimeout(toastT); toastT = setTimeout(function () { el.remove(); }, 3200);
+}
+
+function unitCost(l) { var c = l.c; return c.mat + c.gls + c.acc + c.lab + c.out; }
+function calc(l) {
+  var uc = unitCost(l), mk = S.mk[l.id], up = Math.round(uc * (1 + mk / 100));
+  var cost = uc * l.qty, sell = up * l.qty, gm = sell ? (sell - cost) / sell * 100 : 0;
+  return { uc: uc, up: up, cost: cost, sell: sell, gm: gm, mk: mk };
+}
+function totals() {
+  var c = 0, s = 0, lead = 0;
+  LINES.forEach(function (l) { var r = calc(l); c += r.cost; s += r.sell; lead = Math.max(lead, l.lead); });
+  return { cost: c, sell: s, gm: s ? (s - c) / s * 100 : 0, mk: c ? (s - c) / c * 100 : 0, lead: lead };
+}
+function lineBom(l) {
+  var b = l.bom.slice();
+  if (l.id === 'L3' && S.q.hinge) b.push(['ACC-HDW-PV1', 1]);
+  return b;
+}
+function flags() {
+  var f = [];
+  if (!S.q.hinge) f.push({ k: 'hinge', sev: 'bad', line: 'L3', t: 'Line 3: pivot hinge model not specified', s: 'Door leaf weighs about 210 kg. The BOM cannot be completed without a rated hinge.' });
+  if (!S.q.glassOk) f.push({ k: 'glass', sev: 'warn', line: 'L2', t: 'Line 2: glass cost is 12% below the last six Fusion casement quotes', s: 'Check that the DGU specification and area are correct before approval.' });
+  LINES.forEach(function (l, i) {
+    var r = calc(l);
+    if (r.gm < MARGIN_BLOCK) f.push({ k: 'block-' + l.id, sev: 'bad', line: l.id, t: 'Line ' + (i + 1) + ': gross margin ' + pct(r.gm) + ' is below the ' + MARGIN_BLOCK + '% floor', s: 'Prices below the floor cannot be approved. Raise the markup.' });
+    else if (r.gm < MARGIN_APPROVAL && S.q.marginOk[l.id] !== r.mk) f.push({ k: 'margin-' + l.id, sev: 'warn', line: l.id, t: 'Line ' + (i + 1) + ': gross margin ' + pct(r.gm) + ' is below the ' + MARGIN_APPROVAL + '% approval threshold', s: 'Needs Commercial Director approval, or raise the markup to about ' + Math.ceil(MARGIN_APPROVAL / (100 - MARGIN_APPROVAL) * 100) + '%.' });
+  });
+  return f;
+}
+function bomRows() {
+  var g = {};
+  LINES.forEach(function (l) { lineBom(l).forEach(function (b) { g[b[0]] = (g[b[0]] || 0) + b[1]; }); });
+  return Object.keys(ITEMS).filter(function (k) { return g[k]; }).map(function (k) {
+    var it = ITEMS[k], avail = Math.max(0, it.oh - it.al), short = Math.max(0, g[k] - avail - it.po);
+    return { code: k, it: it, gross: g[k], avail: avail, short: Math.round(short * 10) / 10 };
+  });
+}
+function prGroups() {
+  var gr = {};
+  bomRows().filter(function (r) { return r.short > 0; }).forEach(function (r) {
+    (gr[r.it.sup] = gr[r.it.sup] || []).push(r);
+  });
+  var order = ['A', 'B', 'C', 'R'], i = 0;
+  return order.filter(function (s) { return gr[s]; }).map(function (s) {
+    i++; var val = gr[s].reduce(function (a, r) { return a + r.short * r.it.price; }, 0);
+    return { sup: s, rows: gr[s], val: val, pr: 'PR-0418-0' + i, po: 'PO-26-11' + (86 + i), eta: addW(SUPPLIERS[s].lead) };
+  });
+}
+function woDone(id) { var w = WO_DEF.filter(function (x) { return x.id === id; })[0]; return S.wo[id].step >= w.steps.length; }
+function allWoDone() { return WO_DEF.every(function (w) { return woDone(w.id); }); }
+function dispatched() { return S.hu['FG-0418-01'].st === 'Dispatched'; }
+
+function stages() {
+  var anyRel = WO_DEF.some(function (w) { return S.wo[w.id].rel; });
+  var anyRec = Object.keys(S.proc.received).length > 0;
+  var st = [
+    ['estimation', 'Quotation', S.q.approved],
+    ['oc', 'Order confirmation', S.oc.issued],
+    ['prf', 'PRF', S.prf.released],
+    ['procurement', 'Procurement', S.proc.pos],
+    ['production', 'Production', allWoDone()],
+    ['warehouse', 'QR warehouse', allWoDone() && dispatched()],
+    ['finance', 'Finance', allWoDone() && dispatched()]
+  ];
+  var cur = -1;
+  for (var i = 0; i < st.length; i++) { if (!st[i][2]) { cur = i; break; } }
+  return st.map(function (s, i) { return { v: s[0], l: s[1], done: s[2], cur: i === cur, anyRel: anyRel, anyRec: anyRec }; });
+}
+
+/* Deterministic QR-style mark (illustrative only, not a scannable code) */
+function qr(text) {
+  var N = 21, h = 2166136261, cells = [], i, x, y;
+  for (i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+  function rnd() { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; }
+  function finder(ox, oy) { for (y = 0; y < 7; y++) for (x = 0; x < 7; x++) { var e = x === 0 || y === 0 || x === 6 || y === 6 || (x > 1 && x < 5 && y > 1 && y < 5); cells[(oy + y) * N + ox + x] = e ? 1 : 2; } }
+  finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+  for (y = 0; y < N; y++) for (x = 0; x < N; x++) { var k = y * N + x; if (cells[k] === undefined) { var nearF = (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9); cells[k] = nearF ? 2 : (rnd() > 0.52 ? 1 : 2); } }
+  var p = '';
+  for (y = 0; y < N; y++) for (x = 0; x < N; x++) if (cells[y * N + x] === 1) p += 'M' + (x + 2) + ' ' + (y + 2) + 'h1v1h-1z';
+  return '<svg viewBox="0 0 25 25" aria-hidden="true" shape-rendering="crispEdges"><rect width="25" height="25" fill="#FFFFFF"/><path d="' + p + '" fill="#022A3A"/></svg>';
+}
+
+/* ---------- Shell ---------- */
+var NAV = [
+  ['Management', [['overview', 'Overview']]],
+  ['Order flow', [['estimation', 'Estimation'], ['oc', 'Order confirmation'], ['prf', 'Projects & PRF'], ['procurement', 'Procurement'], ['production', 'Production'], ['warehouse', 'QR warehouse'], ['finance', 'Finance']]]
+];
+var ROLE = { overview: 'Viewing as: Management', estimation: 'Viewing as: Estimation Manager', oc: 'Viewing as: Sales Coordinator', prf: 'Viewing as: Projects Manager', procurement: 'Viewing as: Procurement Officer', production: 'Viewing as: Production Supervisor', warehouse: 'Viewing as: Storekeeper', finance: 'Viewing as: Finance Manager' };
+
+function shell() {
+  var st = stages(), idx = {};
+  st.forEach(function (s, i) { idx[s.v] = s; });
+  var n = 0, h = '';
+  NAV.forEach(function (g) {
+    h += '<div class="grp">' + esc(g[0]) + '</div>';
+    g[1].forEach(function (it) {
+      var s = idx[it[0]], dot = s ? '<span class="dot ' + (s.done ? 'done' : s.cur ? 'cur' : '') + '"></span>' : '';
+      var num = it[0] === 'overview' ? '' : String(++n);
+      h += '<button type="button" data-go="' + it[0] + '" class="' + (S.view === it[0] ? 'on' : '') + '"' + (S.view === it[0] ? ' aria-current="page"' : '') + '><span class="n">' + num + '</span>' + esc(it[1]) + dot + '</button>';
+    });
+  });
+  document.getElementById('nav').innerHTML = h;
+  document.getElementById('rail').innerHTML = st.map(function (s, i) {
+    return '<button type="button" data-go="' + s.v + '" class="' + (s.done ? 'done' : s.cur ? 'cur' : '') + (S.view === s.v ? ' here' : '') + '"><span class="st">' + (s.done ? '✓' : i + 1) + '</span>' + esc(s.l) + '</button>';
+  }).join('');
+  document.getElementById('who').textContent = ROLE[S.view] || '';
+  document.getElementById('auditBtn').textContent = 'Audit trail (' + S.audit.length + ')';
+}
+
+function ph(eyebrow, title, lede, acts) {
+  return '<div class="ph"><div class="t"><p class="eyebrow">' + esc(eyebrow) + '</p><h1>' + esc(title) + '</h1><p class="lede">' + lede + '</p></div>' + (acts ? '<div class="acts">' + acts + '</div>' : '') + '</div>';
+}
+function gate(msg, go, label) {
+  return '<div class="banner warn"><p>' + msg + '</p>' + (go ? '<button type="button" class="btn sm" data-go="' + go + '">' + esc(label) + '</button>' : '') + '</div>';
+}
+
+/* ---------- Overview ---------- */
+function vOverview() {
+  var st = stages(), t = totals();
+  var pipe = [
+    ['Quotations', 14, 3.2, 'estimation', true], ['OC & PRF', 6, 1.4, 'prf'], ['Procurement', 9, 2.3, 'procurement'],
+    ['Production', 11, 3.1, 'production'], ['Ready to dispatch', 5, 1.1, 'warehouse'], ['Installation', 4, 0.6, 'finance']
+  ];
+  var load = [['Cutting', 82], ['CNC machining', 104], ['Assembly', 76], ['Glazing', 69], ['QC & packing', 52]];
+  var orders = [
+    ['ORX-0418', 'Private villa, Al Barari', 'Fusion · Freedom · Renson', t.sell, st.filter(function (s) { return s.cur; })[0], 'warn', 'Renson kit lead time tight'],
+    ['ORX-0402', 'Townhouse cluster, Dubai Hills', 'Fusion', 1240000, { l: 'Procurement' }, 'bad', 'DGU shortage, start slips 6 days'],
+    ['ORX-0397', 'Penthouse, Riyadh', 'Freedom · Renson', 865000, { l: 'Production' }, 'ok', 'On track'],
+    ['ORX-0391', 'Office fit-out, Business Bay', 'Fusion', 612000, { l: 'Production' }, 'warn', 'Margin 26.9% vs 35.0% estimated'],
+    ['ORX-0385', 'Villa refurbishment, Jumeirah', 'Freedom', 284000, { l: 'Ready to dispatch' }, 'ok', 'Dispatch 24 Oct'],
+    ['ORX-0377', 'Show apartment, Riyadh', 'Fusion · Renson', 198000, { l: 'Installation' }, 'ok', 'Handover 30 Oct']
+  ];
+  var docs = [
+    ['Q-2026-0418 Rev 2', 'Quotation', 'estimation', S.q.approved],
+    ['OC-2026-0418', 'Order confirmation', 'oc', S.oc.issued],
+    ['PRF-0418 Rev A', 'Production request', 'prf', S.prf.released],
+    ['PR / PO ×' + prGroups().length, 'Purchasing', 'procurement', S.proc.pos],
+    ['WO-0418-01 to 05', 'Work orders', 'production', allWoDone()],
+    ['DN-0418-01', 'Dispatch note', 'warehouse', dispatched()],
+    ['INV-0418-01', 'Progress invoice', 'finance', dispatched()]
+  ];
+  var curIdx = -1; docs.forEach(function (d, i) { if (curIdx < 0 && !d[3]) curIdx = i; });
+
+  var h = ph('Management overview', 'Operations at a glance', 'Confirmed orders, margin, stock and the exceptions that need a decision this week. One order, ORX-0418, is live in this demo: follow it from quotation to finance.',
+    '<button type="button" class="btn pri" data-go="estimation">Follow ORX-0418</button>');
+  h += '<div class="kpis">' +
+    '<div class="kpi"><span class="l">Confirmed order value</span><span class="v">AED 8.5M</span><span class="d">35 orders in scope</span></div>' +
+    '<div class="kpi"><span class="l">Estimated gross margin</span><span class="v">38.0%</span><span class="d">At quotation approval</span></div>' +
+    '<div class="kpi warn"><span class="l">Actual gross margin</span><span class="v">34.2%</span><span class="d">3.8 pts below estimate</span></div>' +
+    '<div class="kpi"><span class="l">Inventory value</span><span class="v">AED 2.1M</span><span class="d">Incl. WIP AED 0.34M</span></div>' +
+    '<div class="kpi bad"><span class="l">Material shortages</span><span class="v">7 lines</span><span class="d">2 put delivery dates at risk</span></div>' +
+    '</div>';
+
+  h += '<div class="card"><div class="hd"><h2>Order pipeline</h2><span class="sub">Count and value by stage. Quotations are not yet in confirmed value.</span></div><div class="bd"><div class="pipe">' +
+    pipe.map(function (p) { return '<button type="button" class="stg' + (p[4] ? ' q' : '') + '" data-go="' + p[3] + '"><span class="l">' + p[0] + '</span><span class="v">' + p[1] + '</span><span class="d">AED ' + p[2].toFixed(1) + 'M</span></button>'; }).join('') +
+    '</div></div></div>';
+
+  h += '<div class="grid g-main"><div class="stack">';
+  h += '<div class="card"><div class="hd"><h2>Exceptions needing action</h2><span class="sub">Ranked by delivery and margin impact</span></div><div class="bd"><div class="alerts">' +
+    [['bad', 'Shortage', 'ORX-0402: DGU glass 64 m² short. Production start slips from 28 Oct to 03 Nov.', 'procurement', 'Review'],
+     ['bad', 'Capacity', 'CNC machining at 104% next week. Three Fusion work orders queue behind ORX-0397.', 'production', 'Rebalance'],
+     ['warn', 'Margin', 'ORX-0391 forecast margin 26.9% against 35.0% at approval. Rework on 11 casements.', 'finance', 'See bridge'],
+     ['warn', 'Lead time', 'ORX-0418: Renson Camargue kit is 8 weeks from order. Install date leaves 3 weeks of float.', 'procurement', 'Open'],
+     ['info', 'Stock', 'AED 146k of profiles older than 180 days. 62% are discontinued RAL 9010 gloss.', 'finance', 'Open']]
+    .map(function (a) { return '<div class="alert">' + pill(a[0] === 'info' ? 'info' : a[0], a[1]) + '<p>' + esc(a[2]) + '</p><button type="button" class="btn sm" data-go="' + a[3] + '">' + a[4] + '</button></div>'; }).join('') +
+    '</div></div></div>';
+
+  h += '<div class="card"><div class="hd"><h2>Orders in progress</h2><span class="sub">Top six by attention</span></div><div class="tw"><table><thead><tr><th>Order</th><th>Project (sample)</th><th>Systems</th><th class="r">Value</th><th>Stage</th><th>Status</th></tr></thead><tbody>' +
+    orders.map(function (o) { return '<tr' + (o[0] === 'ORX-0418' ? ' class="click sel" data-go="estimation"' : '') + '><td class="mono">' + o[0] + '</td><td>' + esc(o[1]) + '</td><td class="psub">' + esc(o[2]) + '</td><td class="r">' + aed(o[3]) + '</td><td>' + esc(o[4] ? o[4].l : 'Complete') + '</td><td>' + pill(o[5], o[6]) + '</td></tr>'; }).join('') +
+    '</tbody></table></div></div>';
+
+  h += '<div class="grid g2"><div class="card"><div class="hd"><h2>Production load</h2><span class="sub">Next week, % of capacity</span></div><div class="bd"><div class="bars">' +
+    load.map(function (l) { var w = Math.min(l[1], 120) / 120 * 100; return '<div class="bar"><span>' + l[0] + '</span><span class="tr"><span class="fl ' + (l[1] > 100 ? 'hot' : l[1] > 85 ? 'mid' : '') + '" style="width:' + w + '%"></span><span class="cap" style="left:' + (100 / 120 * 100) + '%"></span></span><span class="val">' + l[1] + '%</span></div>'; }).join('') +
+    '</div><p class="note" style="margin-top:10px">Marker shows 100% capacity. Scale runs to 120%.</p></div></div>' +
+    '<div class="card"><div class="hd"><h2>Margin bridge</h2><span class="sub">All confirmed orders</span></div><div class="bd">' + bridge(38.0, [['Supplier price', -1.6], ['Excess usage', -0.9], ['Unplanned outsourcing', -0.7], ['Rework', -0.6]], 'Estimated', 'Actual') + '</div></div></div>';
+  h += '</div><div class="stack">';
+
+  h += '<div class="card"><div class="hd"><h2>ORX-0418 document thread</h2><span class="sub">One reference across every module</span></div><div class="bd"><div class="thread">' +
+    docs.map(function (d, i) { return '<div class="row ' + (d[3] ? 'done' : i === curIdx ? 'cur' : '') + '"><span class="ic"></span><div><div>' + esc(d[1]) + '</div><div class="doc">' + esc(d[0]) + '</div></div><button type="button" class="btn sm" data-go="' + d[2] + '">' + (d[3] ? 'View' : i === curIdx ? 'Next step' : 'Preview') + '</button></div>'; }).join('') +
+    '</div></div></div>';
+  h += '<div class="ai"><span class="tag">AI insight · sample</span><p>Actual margin is 3.8 points below estimate. Supplier A\'s profile price rise explains 1.6 points across 14 orders. Locking a quarterly price for Fusion profiles would have protected about AED 136k.</p><div><button type="button" class="btn sm" data-go="finance">Open finance view</button></div></div>';
+  h += '<div class="card"><div class="hd"><h2>Recent activity</h2><span class="r"><button type="button" class="btn sm" data-act="audit">Full trail</button></span></div><div class="bd">' + auditList(6) + '</div></div>';
+  h += '</div></div>';
+  return h;
+}
+
+function bridge(start, steps, l0, l1) {
+  var W = 460, H = 220, padL = 40, padB = 34, padT = 24, top = Math.ceil(start), end = start, lo;
+  steps.forEach(function (s) { end += s[1]; });
+  lo = Math.floor(end) - 1;
+  var cols = steps.length + 2, cw = (W - padL - 10) / cols, bw = cw * 0.56;
+  function y(v) { return padT + (top - v) / (top - lo) * (H - padT - padB); }
+  var g = '', run = start, i, tk;
+  for (tk = lo; tk <= top; tk++) g += '<line class="gl" x1="' + padL + '" x2="' + (W - 6) + '" y1="' + y(tk) + '" y2="' + y(tk) + '"/><text x="' + (padL - 6) + '" y="' + (y(tk) + 4) + '" text-anchor="end">' + tk + '%</text>';
+  function col(ix, a, b, fill, lab, val) {
+    var x = padL + ix * cw + (cw - bw) / 2, y1 = y(Math.max(a, b)), y2 = y(Math.min(a, b));
+    return '<rect x="' + x + '" y="' + y1 + '" width="' + bw + '" height="' + Math.max(1, y2 - y1) + '" rx="2" fill="' + fill + '"/>' +
+      '<text class="vt" x="' + (x + bw / 2) + '" y="' + (y1 - 6) + '" text-anchor="middle">' + val + '</text>' +
+      '<text x="' + (x + bw / 2) + '" y="' + (H - padB + 16) + '" text-anchor="middle">' + lab + '</text>';
+  }
+  var css = getComputedStyle(document.documentElement);
+  var cA = css.getPropertyValue('--steel').trim() || '#5E8A9C', cR = css.getPropertyValue('--red').trim() || '#A4231A', cE = css.getPropertyValue('--accent').trim() || '#022A3A';
+  g += col(0, lo, start, cE, l0, start.toFixed(1) + '%');
+  for (i = 0; i < steps.length; i++) { var nx = run + steps[i][1]; g += col(i + 1, run, nx, steps[i][1] < 0 ? cR : cA, steps[i][0].split(' ')[0], (steps[i][1] > 0 ? '+' : '') + steps[i][1].toFixed(1)); run = nx; }
+  g += col(cols - 1, lo, run, cA, l1, run.toFixed(1) + '%');
+  var leg = steps.map(function (s) { return esc(s[0]) + ' ' + (s[1] > 0 ? '+' : '') + s[1].toFixed(1) + ' pts'; }).join(' · ');
+  return '<div class="bridge"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Margin bridge from ' + start.toFixed(1) + '% to ' + run.toFixed(1) + '%">' + g + '</svg></div><p class="note">' + leg + '. Axis starts at ' + lo + '%.</p>';
+}
+
+function auditList(n) {
+  var a = S.audit.slice().reverse(); if (n) a = a.slice(0, n);
+  return '<div class="audit">' + a.map(function (e) { var p = e[0].split(' · '); return '<div class="e"><div class="tm">' + esc(p[0]) + '<br>' + esc(p[1] || '') + '</div><div><span class="mod">' + esc(e[1]) + '</span>' + esc(e[3]) + '<div class="by">' + esc(e[2]) + '</div></div></div>'; }).join('') + '</div>';
+}
+
+/* ---------- Estimation ---------- */
+function vEstimation() {
+  var t = totals(), f = flags(), blocking = f.length, status = S.q.approved ? pill('ok', 'Approved') : blocking ? pill('warn', blocking + ' item' + (blocking > 1 ? 's' : '') + ' to clear') : pill('info', 'Ready to approve');
+  var h = ph('Estimation & costing · Q-2026-0418 Rev 2', 'Quotation costing', 'Every product line with its configuration, cost build-up, markup, margin, price and lead time. Change a markup to see price and margin update. ' + status,
+    S.q.approved ? '<button type="button" class="btn pri" data-go="oc">Open order confirmation</button>' :
+    '<button type="button" class="btn pri" data-act="approveQ"' + (blocking ? ' disabled title="Clear the flagged items first"' : '') + '>Approve and generate OC</button>');
+  h += '<div class="kpis">' +
+    '<div class="kpi"><span class="l">Selling price</span><span class="v">' + aed(t.sell) + '</span><span class="d">Excl. VAT · 6 lines</span></div>' +
+    '<div class="kpi"><span class="l">Estimated cost</span><span class="v">' + aed(t.cost) + '</span><span class="d">Material, labour, outsourced</span></div>' +
+    '<div class="kpi"><span class="l">Blended markup</span><span class="v">' + pct(t.mk) + '</span><span class="d">(price − cost) ÷ cost</span></div>' +
+    '<div class="kpi ' + (t.gm < MARGIN_APPROVAL ? 'warn' : 'good') + '"><span class="l">Gross margin</span><span class="v">' + pct(t.gm) + '</span><span class="d">(price − cost) ÷ price</span></div>' +
+    '<div class="kpi"><span class="l">Longest lead time</span><span class="v">' + t.lead + ' weeks</span><span class="d">Renson pergola kit</span></div>' +
+    '</div>';
+
+  h += '<div class="card"><div class="hd"><h2>Product lines</h2><span class="sub">Select a line to see its cost build-up and BOM</span></div><div class="tw"><table><thead><tr><th>#</th><th>Product & configuration</th><th class="r">Qty</th><th class="r">Unit cost</th><th class="r">Total cost</th><th class="r">Markup %</th><th class="r">Unit price</th><th class="r">Line price</th><th class="r">Gross margin</th><th class="r">Lead</th><th>Route</th></tr></thead><tbody>';
+  LINES.forEach(function (l, i) {
+    var r = calc(l), lf = f.filter(function (x) { return x.line === l.id; });
+    var gmCls = r.gm < MARGIN_BLOCK ? 'bad' : r.gm < MARGIN_APPROVAL ? 'warn' : 'ok';
+    h += '<tr class="click' + (S.selLine === l.id ? ' sel' : '') + '" data-line="' + l.id + '"><td class="mono">' + (i + 1) + '</td><td><div class="pname">' + esc(l.name) + (lf.length ? ' ' + pill(lf[0].sev, lf.length + ' flag') : '') + '</div><div class="psub">' + esc(l.cfg) + ' · ' + n0(l.w) + ' × ' + n0(l.h) + ' mm · ' + esc(l.fin) + '</div></td>' +
+      '<td class="r">' + l.qty + '</td><td class="r">' + n0(r.uc) + '</td><td class="r">' + n0(r.cost) + '</td>' +
+      '<td class="r"><input class="mk" type="number" id="mk-' + l.id + '" data-mk="' + l.id + '" value="' + r.mk + '" min="0" max="200" step="1" aria-label="Markup for line ' + (i + 1) + '"' + (S.q.approved ? ' disabled' : '') + '></td>' +
+      '<td class="r">' + n0(r.up) + '</td><td class="r">' + n0(r.sell) + '</td><td class="r">' + pill(gmCls, pct(r.gm)) + '</td><td class="r">' + l.lead + ' wks</td><td class="psub">' + esc(l.path) + '</td></tr>';
+  });
+  h += '</tbody><tfoot><tr><td></td><td>Order total (AED, excl. VAT)</td><td class="r">' + LINES.reduce(function (a, l) { return a + l.qty; }, 0) + '</td><td></td><td class="r">' + n0(t.cost) + '</td><td class="r">' + pct(t.mk) + '</td><td></td><td class="r">' + n0(t.sell) + '</td><td class="r">' + pct(t.gm) + '</td><td class="r">' + t.lead + ' wks</td><td></td></tr></tfoot></table></div></div>';
+
+  var l = LINES.filter(function (x) { return x.id === S.selLine; })[0], r = calc(l), uc = r.uc;
+  h += '<div class="grid g2"><div class="card"><div class="hd"><h2>Line ' + l.id.slice(1) + ': ' + esc(l.name) + '</h2><span class="sub">Cost per unit</span></div><div class="bd stack">';
+  h += '<div class="bars">' + CATS.map(function (c) { var v = l.c[c[0]]; return '<div class="bar"><span>' + c[1] + '</span><span class="tr"><span class="fl" style="width:' + (uc ? v / uc * 100 : 0) + '%"></span></span><span class="val">' + n0(v) + '</span></div>'; }).join('') + '</div>';
+  h += '<dl class="kv"><dt>System</dt><dd>' + esc(l.fam) + ' · ' + esc(l.cfg) + '</dd><dt>Size</dt><dd>' + n0(l.w) + ' × ' + n0(l.h) + ' mm</dd><dt>Finish</dt><dd>' + esc(l.fin) + '</dd><dt>Glazing</dt><dd>' + esc(l.gls) + '</dd><dt>Production route</dt><dd>' + esc(l.route) + '</dd><dt>Unit cost / price</dt><dd>' + aed(uc) + ' / ' + aed(r.up) + '</dd></dl>';
+  h += '</div></div><div class="card"><div class="hd"><h2>Bill of materials</h2><span class="sub">Line totals, feeds Procurement</span></div><div class="tw"><table><thead><tr><th>Code</th><th>Component</th><th class="r">Qty</th></tr></thead><tbody>' +
+    lineBom(l).map(function (b) { return '<tr><td class="mono">' + b[0] + '</td><td>' + esc(ITEMS[b[0]].d) + '</td><td class="r">' + q1(b[1]) + ' ' + ITEMS[b[0]].u + '</td></tr>'; }).join('') +
+    (l.id === 'L3' && !S.q.hinge ? '<tr><td class="mono">—</td><td>' + pill('bad', 'Pivot hinge missing') + '</td><td class="r">—</td></tr>' : '') +
+    '</tbody></table></div></div></div>';
+
+  h += '<div class="card"><div class="hd"><h2>Checks before approval</h2><span class="sub">Rule checks and AI review. All items must be cleared or approved.</span></div><div class="bd"><div class="flags">';
+  if (!f.length) h += '<div class="flag ok"><div><p>All checks clear.</p><p class="psub">' + (S.q.approved ? 'Approved by Estimation Manager. OC-2026-0418 generated.' : 'The quotation can be approved.') + '</p></div><div></div></div>';
+  f.forEach(function (x) {
+    var act = '';
+    if (x.k === 'hinge') act = '<select id="hingeSel" aria-label="Hinge model"><option value="ACC-HDW-PV1">ACC-HDW-PV1 · 300 kg rated</option></select><button type="button" class="btn sm pri" data-act="hinge">Add to BOM</button>';
+    else if (x.k === 'glass') act = '<button type="button" class="btn sm" data-act="glass">Checked, spec is correct</button>';
+    else if (x.k.indexOf('margin-') === 0) act = '<button type="button" class="btn sm" data-act="raise" data-l="' + x.line + '">Raise markup</button><button type="button" class="btn sm pri" data-act="mApprove" data-l="' + x.line + '">Approve at this margin</button>';
+    else act = '<button type="button" class="btn sm" data-act="raise" data-l="' + x.line + '">Raise markup</button>';
+    h += '<div class="flag ' + x.sev + '"><div><p>' + esc(x.t) + '</p><p class="psub">' + esc(x.s) + '</p></div><div class="fa">' + act + '</div></div>';
+  });
+  h += '</div><p class="note" style="margin-top:12px">Approval rule (sample): gross margin below ' + MARGIN_APPROVAL + '% needs Commercial Director approval; below ' + MARGIN_BLOCK + '% cannot be approved.</p></div></div>';
+  return h;
+}
+
+/* ---------- OC ---------- */
+function vOC() {
+  if (!S.q.approved) return ph('Sales · Order confirmation', 'Order confirmation', 'The OC is generated from the approved quotation, so prices, quantities and finishes are never re-keyed.') + gate('OC-2026-0418 is generated once Q-2026-0418 is approved.', 'estimation', 'Go to estimation');
+  var t = totals(), vat = Math.round(t.sell * VAT);
+  var stp = ['Generated from Q-2026-0418 Rev 2', 'Checked by Sales', 'Issued to client'];
+  var at = S.oc.issued ? 3 : 1;
+  var h = ph('Sales · Order confirmation', 'OC-2026-0418', 'Generated from the approved quotation and configuration. Nothing on this page was typed by hand.',
+    S.oc.issued ? '<button type="button" class="btn pri" data-go="prf">Open PRF-0418</button>' : '<button type="button" class="btn pri" data-act="issueOC">Issue OC and create PRF</button>');
+  h += '<div class="steps">' + stp.map(function (s, i) { return '<span class="s ' + (i < at ? 'done' : i === at ? 'cur' : '') + '">' + esc(s) + '</span>'; }).join('') + '</div>';
+  h += '<div class="ai"><span class="tag">AI consistency check</span><p>OC matches Q-2026-0418 Rev 2 on all 6 lines: quantities, sizes, finishes and prices agree. One note: lines 3 and 4 use anodised bronze, so the client should approve a finish sample before PRF release.</p></div>';
+  h += '<div class="doc-prev"><div class="dh"><div><div class="logo">ORYX</div><div class="psub">Doors · Windows · Shading</div></div><dl><dt>OC number</dt><dd class="mono">OC-2026-0418</dd><dt>Date</dt><dd>' + dstr(TODAY) + '</dd><dt>Quotation</dt><dd class="mono">Q-2026-0418 Rev 2</dd><dt>Order ref</dt><dd class="mono">ORX-0418</dd></dl></div>';
+  h += '<dl class="kv"><dt>Client</dt><dd>Sample client · private villa, Al Barari, Dubai</dd><dt>Required on site</dt><dd>15 Jan 2027</dd><dt>Scope</dt><dd>Supply, delivery and installation</dd><dt>Payment terms</dt><dd>Per signed contract. Finance to confirm before issue.</dd></dl>';
+  h += '<div class="tw"><table><thead><tr><th>#</th><th>Description</th><th>Size (mm)</th><th>Finish</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Amount</th></tr></thead><tbody>' +
+    LINES.map(function (l, i) { var r = calc(l); return '<tr><td class="mono">' + (i + 1) + '</td><td><div class="pname">' + esc(l.name) + '</div><div class="psub">' + esc(l.cfg) + ' · ' + esc(l.gls) + '</div></td><td>' + n0(l.w) + ' × ' + n0(l.h) + '</td><td>' + esc(l.fin) + '</td><td class="r">' + l.qty + '</td><td class="r">' + n0(r.up) + '</td><td class="r">' + n0(r.sell) + '</td></tr>'; }).join('') +
+    '</tbody><tfoot><tr><td colspan="6">Subtotal (AED)</td><td class="r">' + n0(t.sell) + '</td></tr><tr><td colspan="6">VAT 5%</td><td class="r">' + n0(vat) + '</td></tr><tr><td colspan="6">Total (AED)</td><td class="r">' + n0(t.sell + vat) + '</td></tr></tfoot></table></div>';
+  h += '<p class="note">Sample document for the prototype. Terms, warranty and delivery conditions come from the approved contract template.</p></div>';
+  return h;
+}
+
+/* ---------- PRF ---------- */
+var CHECKS = [
+  ['bom', 'BOM references linked to each line', 'Auto-filled from Q-2026-0418 Rev 2'],
+  ['fin', 'Finishes match the OC', 'RAL 7016 matt, RAL 7016 textured, anodised bronze'],
+  ['draw', 'Shop drawings attached and approved', 'ORX-0418_Shop-drawings_RevB.pdf'],
+  ['site', 'Site dimensions verified', 'Survey of 17 Oct 2026; 2 openings within ±3 mm tolerance'],
+  ['glass', 'Glazing specification confirmed', 'DGU 6/16Ar/6 low-E, toughened both panes'],
+  ['hw', 'Hardware schedule confirmed', 'Includes pivot hinge ACC-HDW-PV1'],
+  ['dates', 'Required dates confirmed with site', 'Fusion and Freedom by 05 Jan 2027; Renson by 12 Jan 2027']
+];
+function vPRF() {
+  if (!S.oc.issued) return ph('Projects · Production Request Form', 'Projects & PRF', 'The PRF is drafted from the OC, verified by Projects, then released to Procurement and Production.') + gate('PRF-0418 is drafted automatically when OC-2026-0418 is issued.', S.q.approved ? 'oc' : 'estimation', S.q.approved ? 'Go to order confirmation' : 'Go to estimation');
+  var c = S.prf.checks, done = CHECKS.filter(function (x) { return c[x[0]]; }).length, all = done === CHECKS.length;
+  var h = ph('Projects · Production Request Form', 'PRF-0418 Rev A', 'Drafted from OC-2026-0418. Projects verifies technical completeness, then releases each line to its production or purchasing route. ' + (S.prf.released ? pill('ok', 'Released') : pill('warn', done + ' of ' + CHECKS.length + ' checks complete')),
+    S.prf.released ? '<button type="button" class="btn pri" data-go="procurement">Open procurement</button>' : '<button type="button" class="btn pri" data-act="releasePRF"' + (all ? '' : ' disabled title="Complete the technical checklist first"') + '>Release PRF</button>');
+  if (!S.prf.released) h += '<div class="banner"><p>Purchasing and production stay locked until this PRF is released. Exception: authorised advance procurement for long-lead items.</p></div>';
+  h += '<div class="card"><div class="hd"><h2>Line routing</h2><span class="sub">Set by product rules: make, buy or subcontract</span></div><div class="tw"><table><thead><tr><th>#</th><th>Product</th><th class="r">Qty</th><th>Path</th><th>Routed to</th><th>Required by</th><th>Status</th></tr></thead><tbody>' +
+    LINES.map(function (l, i) { return '<tr><td class="mono">' + (i + 1) + '</td><td><div class="pname">' + esc(l.name) + '</div><div class="psub">' + n0(l.w) + ' × ' + n0(l.h) + ' mm · ' + esc(l.fin) + '</div></td><td class="r">' + l.qty + '</td><td>' + esc(l.path) + '</td><td>' + esc(l.route) + '</td><td>' + (l.fam === 'Renson' ? '12 Jan 2027' : '05 Jan 2027') + '</td><td>' + (S.prf.released ? pill('ok', 'Released') : pill('', 'Draft')) + '</td></tr>'; }).join('') +
+    '</tbody></table></div></div>';
+  h += '<div class="grid g-main"><div class="card"><div class="hd"><h2>Technical checklist</h2><span class="sub">Owner: Projects Manager</span></div><div class="bd">' +
+    CHECKS.map(function (x) { return '<div class="check"><input type="checkbox" id="ck-' + x[0] + '" data-ck="' + x[0] + '"' + (c[x[0]] ? ' checked' : '') + (S.prf.released || x[0] === 'bom' || x[0] === 'fin' ? ' disabled' : '') + '><label for="ck-' + x[0] + '"><div>' + esc(x[1]) + '</div><div class="psub">' + esc(x[2]) + '</div></label>' + (x[0] === 'bom' || x[0] === 'fin' ? pill('info', 'Auto') : c[x[0]] ? pill('ok', 'Done') : pill('', 'Open')) + '</div>'; }).join('') +
+    '</div></div><div class="stack"><div class="card"><div class="hd"><h2>Attachments</h2></div><div class="bd"><div class="files">' +
+    [['pdf', 'ORX-0418_Shop-drawings_RevB.pdf', '2.4 MB'], ['pdf', 'Site-survey_17-Oct-2026.pdf', '1.1 MB'], ['xlsx', 'Hardware-schedule_v2.xlsx', '86 KB'], ['jpg', 'Finish-sample_anodised-bronze.jpg', '640 KB']]
+      .map(function (f) { return '<div class="file"><span class="ext">' + f[0] + '</span><span>' + esc(f[1]) + '</span><span class="psub">' + f[2] + '</span></div>'; }).join('') +
+    '</div><p class="note" style="margin-top:10px">Sample file names. No files are stored in the prototype.</p></div></div>' +
+    '<div class="card"><div class="hd"><h2>Revision history</h2></div><div class="bd"><div class="audit">' +
+    (S.prf.released ? '<div class="e"><div class="tm">' + dstr(TODAY) + '</div><div>Rev A released to Procurement and Production<div class="by">Projects Manager</div></div></div>' : '') +
+    '<div class="e"><div class="tm">' + dstr(TODAY) + '</div><div>Rev A drafted from OC-2026-0418<div class="by">System</div></div></div>' +
+    '<div class="e"><div class="tm">16 Oct 2026</div><div>Linked to Q-2026-0418 Rev 2 and configuration CFG-0418-02<div class="by">System</div></div></div>' +
+    '</div></div></div></div></div>';
+  return h;
+}
+
+/* ---------- Procurement ---------- */
+function vProcurement() {
+  var rows = bomRows(), groups = prGroups(), shortVal = rows.reduce(function (a, r) { return a + r.short * r.it.price; }, 0), nShort = rows.filter(function (r) { return r.short > 0; }).length;
+  var acts = !S.prf.released ? '<button type="button" class="btn pri" disabled>Create purchase requisitions</button>'
+    : !S.proc.prs ? '<button type="button" class="btn pri" data-act="createPR">Create ' + groups.length + ' purchase requisitions</button>'
+    : !S.proc.pos ? '<button type="button" class="btn pri" data-act="issuePO">Approve and issue ' + groups.length + ' POs</button>'
+    : '<button type="button" class="btn pri" data-go="warehouse">Receive at warehouse</button>';
+  var h = ph('Procurement · PRF-0418', 'Material requirements', 'The BOM is exploded and netted against usable stock, existing allocations and open POs. Only the net shortage is purchased.', acts);
+  if (!S.prf.released) h += gate('Requirements are provisional until PRF-0418 is released.', S.oc.issued ? 'prf' : S.q.approved ? 'oc' : 'estimation', 'Go to the next open step');
+  h += '<div class="kpis"><div class="kpi"><span class="l">BOM components</span><span class="v">' + rows.length + '</span><span class="d">Across 6 product lines</span></div>' +
+    '<div class="kpi ' + (nShort ? 'warn' : 'good') + '"><span class="l">Net shortages</span><span class="v">' + nShort + '</span><span class="d">After stock and open POs</span></div>' +
+    '<div class="kpi"><span class="l">Shortage value</span><span class="v">' + aed(shortVal) + '</span><span class="d">At current supplier prices</span></div>' +
+    '<div class="kpi"><span class="l">Purchasing status</span><span class="v">' + (S.proc.pos ? 'POs issued' : S.proc.prs ? 'PRs drafted' : 'Not started') + '</span><span class="d">' + groups.length + ' suppliers</span></div></div>';
+  h += '<div class="card"><div class="hd"><h2>BOM explosion and net requirement</h2><span class="sub">Net shortage = gross − (on hand − allocated) − open PO</span></div><div class="tw"><table><thead><tr><th>Code</th><th>Component</th><th class="r">Gross</th><th class="r">On hand</th><th class="r">Allocated</th><th class="r">Open PO</th><th class="r">Net shortage</th><th>Suggested supplier</th><th>ETA</th><th>Status</th></tr></thead><tbody>' +
+    rows.map(function (r) {
+      var sp = SUPPLIERS[r.it.sup], g = groups.filter(function (x) { return x.sup === r.it.sup; })[0];
+      var stt = r.short <= 0 ? pill('ok', 'Covered') : S.proc.received[r.code] ? pill('ok', 'Received') : S.proc.pos ? pill('info', g.po) : S.proc.prs ? pill('warn', g.pr + ' draft') : pill('bad', 'Short');
+      return '<tr><td class="mono">' + r.code + '</td><td>' + esc(r.it.d) + '</td><td class="r">' + q1(r.gross) + '</td><td class="r">' + r.it.oh + '</td><td class="r">' + r.it.al + '</td><td class="r">' + r.it.po + '</td><td class="r"><b>' + (r.short > 0 ? q1(r.short) + ' ' + r.it.u : '—') + '</b></td><td>' + (r.short > 0 ? esc(sp.n) : '<span class="faint">From stock</span>') + '</td><td>' + (r.short > 0 ? dstr(addW(sp.lead)) : '—') + '</td><td>' + stt + '</td></tr>';
+    }).join('') + '</tbody></table></div></div>';
+  h += '<div class="grid g-main"><div class="card"><div class="hd"><h2>' + (S.proc.pos ? 'Purchase orders' : 'Purchase requisitions') + '</h2><span class="sub">Grouped by supplier and delivery date</span></div><div class="tw"><table><thead><tr><th>' + (S.proc.pos ? 'PO' : 'PR') + '</th><th>Supplier</th><th>Lines</th><th class="r">Value</th><th>ETA</th><th>Status</th></tr></thead><tbody>' +
+    groups.map(function (g) { var sp = SUPPLIERS[g.sup], rec = g.rows.every(function (r) { return S.proc.received[r.code]; }); return '<tr><td class="mono">' + (S.proc.pos ? g.po : g.pr) + '</td><td>' + esc(sp.n) + '<div class="psub">On-time ' + sp.otd + '% · quality ' + sp.q + '/5 · ' + esc(sp.alt) + '</div></td><td>' + g.rows.map(function (r) { return '<div class="mono">' + r.code + ' × ' + q1(r.short) + '</div>'; }).join('') + '</td><td class="r">' + aed(g.val) + '</td><td>' + dstr(g.eta) + '</td><td>' + (rec ? pill('ok', 'Received') : S.proc.pos ? pill('info', 'Issued') : S.proc.prs ? pill('warn', 'Awaiting approval') : pill('', 'Not raised')) + '</td></tr>'; }).join('') +
+    '</tbody></table></div></div><div class="stack"><div class="ai"><span class="tag">AI suggestion · sample</span><p>ORX-0402 also needs 32 bars of FUS-PRO-001 by 04 Nov. Combining both into one order of 78 bars reaches Supplier A\'s full-bundle price (about 4% lower). Neither delivery date moves.</p></div>' +
+    '<div class="ai"><span class="tag">Lead-time watch</span><p>Renson kits arrive ' + dstr(addW(8)) + '. Required on site 12 Jan 2027, leaving 3 weeks for assembly and transport.</p></div></div></div>';
+  return h;
+}
+
+/* ---------- Production ---------- */
+function woLine(w) { return LINES.filter(function (l) { return l.id === w.line; })[0]; }
+function vProduction() {
+  var h = ph('Production · ORX-0418', 'Work orders', 'Each manufactured line becomes a work order with its BOM, routing and labour standard. Record material issue, progress and scrap where the work happens.');
+  if (!S.proc.pos) h += gate('Work orders are planned. Release to the floor once materials are reserved or on order.', S.prf.released ? 'procurement' : S.oc.issued ? 'prf' : S.q.approved ? 'oc' : 'estimation', 'Go to the next open step');
+  var totStd = 0, totAct = 0, totScrap = 0, nDone = 0;
+  WO_DEF.forEach(function (w) { var s = S.wo[w.id]; totStd += w.std * Math.min(s.step, w.steps.length) / w.steps.length; totAct += s.hrs; totScrap += s.scrap; if (woDone(w.id)) nDone++; });
+  h += '<div class="kpis"><div class="kpi"><span class="l">Work orders</span><span class="v">' + nDone + ' / ' + WO_DEF.length + '</span><span class="d">Complete</span></div>' +
+    '<div class="kpi"><span class="l">Labour, earned vs actual</span><span class="v">' + n0(totStd) + ' / ' + n0(totAct) + ' h</span><span class="d">' + (totStd ? pct((totAct / totStd - 1) * 100) + ' variance' : 'No hours booked yet') + '</span></div>' +
+    '<div class="kpi ' + (totScrap ? 'warn' : '') + '"><span class="l">Scrap logged</span><span class="v">' + totScrap + ' bars</span><span class="d">' + aed(totScrap * ITEMS['FUS-PRO-001'].price) + '</span></div>' +
+    '<div class="kpi bad"><span class="l">Bottleneck</span><span class="v">CNC</span><span class="d">104% load next week</span></div></div>';
+  h += '<div class="grid g-main"><div class="stack"><div class="grid g2">';
+  WO_DEF.forEach(function (w) {
+    var s = S.wo[w.id], l = woLine(w), n = w.steps.length, d = woDone(w.id);
+    var st = d ? pill('ok', 'Complete') : s.rel ? pill('info', 'On ' + w.steps[s.step]) : pill('', 'Planned');
+    h += '<button type="button" class="wo' + (S.selWo === w.id ? ' sel' : '') + '" data-wo="' + w.id + '"><div class="top-l"><span class="mono">' + w.id + '</span>' + st + '</div><div><div class="pname">' + esc(l.name) + (w.also ? ' + zip blinds' : '') + '</div><div class="psub">' + esc(w.ws) + ' workstream · qty ' + l.qty + (w.also ? ' + 6' : '') + ' · std ' + w.std + ' h</div></div><div class="prog"><i style="width:' + (Math.min(s.step, n) / n * 100) + '%"></i></div></button>';
+  });
+  h += '</div></div>';
+  var w = WO_DEF.filter(function (x) { return x.id === S.selWo; })[0], s = S.wo[w.id], l = woLine(w), d = woDone(w.id);
+  var btns = !s.rel ? '<button type="button" class="btn pri sm" data-act="woRel"' + (S.proc.pos ? '' : ' disabled') + '>Release to floor</button>' :
+    (d ? '' : '<button type="button" class="btn pri sm" data-act="woStep">Complete ' + esc(w.steps[s.step]) + '</button>') +
+    (s.issued ? '' : '<button type="button" class="btn sm" data-act="woIssue">Issue materials</button>') +
+    (w.ws === 'Fusion' && !d ? '<button type="button" class="btn sm" data-act="woScrap">Log 1 bar scrap</button>' : '');
+  h += '<div class="stack"><div class="card"><div class="hd"><h2 class="mono">' + w.id + '</h2><span class="sub">' + esc(l.name) + '</span></div><div class="bd stack">' +
+    '<div class="steps">' + w.steps.map(function (x, i) { return '<span class="s ' + (i < s.step ? 'done' : (i === s.step && s.rel) ? 'cur' : '') + (i === w.sub ? ' sub' : '') + '">' + esc(x) + '</span>'; }).join('') + '</div>' +
+    '<dl class="kv"><dt>Workstation route</dt><dd>' + esc(l.route) + '</dd><dt>Target completion</dt><dd>' + (l.fam === 'Renson' ? '05 Jan 2027' : '18 Dec 2026') + '</dd><dt>Materials</dt><dd>' + (s.issued ? 'Issued to WO' : S.proc.pos ? 'Reserved / on order' : 'Awaiting PO') + '</dd><dt>Labour</dt><dd>' + q1(s.hrs) + ' h booked of ' + w.std + ' h standard</dd><dt>Scrap</dt><dd>' + s.scrap + ' bars</dd></dl>' +
+    '<div class="row-gap">' + btns + '</div>' +
+    (w.sub != null ? '<p class="note">Dashed step is subcontracted (anodising). It follows the subcontract PO path.</p>' : '') +
+    '</div></div>';
+  h += '<div class="card"><div class="hd"><h2>Workstation load</h2><span class="sub">Next week</span></div><div class="bd"><div class="bars">' +
+    [['Cutting', 82], ['CNC machining', 104], ['Assembly', 76], ['Glazing', 69], ['QC & packing', 52]].map(function (x) { return '<div class="bar"><span>' + x[0] + '</span><span class="tr"><span class="fl ' + (x[1] > 100 ? 'hot' : x[1] > 85 ? 'mid' : '') + '" style="width:' + (x[1] / 120 * 100) + '%"></span><span class="cap" style="left:' + (100 / 120 * 100) + '%"></span></span><span class="val">' + x[1] + '%</span></div>'; }).join('') +
+    '</div></div></div></div></div>';
+  return h;
+}
+
+/* ---------- QR warehouse ---------- */
+var MODES = [['put', 'Receive & put away'], ['move', 'Transfer'], ['pick', 'Pick to production'], ['dsp', 'Dispatch']];
+function vWarehouse() {
+  var W = S.wh, h = ph('Inventory · QR warehouse', 'QR scanning', 'Scan the item, scan the location, confirm quantity and condition. Each scan creates a verified stock transaction with who, when, from, to and how much.');
+  var stepN = { item: 1, loc: 2, qty: 3, done: 3 }[W.step];
+  var p = '<div class="phone"><div class="screen"><div class="sbar"><span>09:41</span><span>Oryx Stock</span></div><div class="apphd"><b>' + esc(MODES.filter(function (m) { return m[0] === W.mode; })[0][1]) + '</b><div class="modes">' +
+    MODES.map(function (m) { return '<button type="button" data-mode="' + m[0] + '" class="' + (W.mode === m[0] ? 'on' : '') + '">' + esc(m[1]) + '</button>'; }).join('') + '</div></div><div class="pbody">';
+  p += '<div class="pstep">Step ' + stepN + ' of 3 <i class="on"></i><i class="' + (stepN >= 2 ? 'on' : '') + '"></i><i class="' + (stepN >= 3 ? 'on' : '') + '"></i></div>';
+  if (W.err) p += '<div class="perr" role="alert"><b>' + esc(W.err[0]) + '</b>' + esc(W.err[1]) + '</div>';
+  if (W.step === 'item') {
+    p += '<div class="viewfinder"><div class="corners"></div><div class="laser"></div><div class="hint">Point at the item, bundle or pallet label</div></div>';
+    p += '<div class="psub">Sample labels. Tap one to scan it.</div><div class="labels">' + Object.keys(S.hu).map(function (k) { return '<button type="button" class="qlabel" data-scan="' + k + '">' + qr(k) + '<span><span class="mono">' + k + '</span></span></button>'; }).join('') + '</div>';
+    p += '<div class="manual"><input id="manItem" placeholder="Or type the label code" aria-label="Item code"><button type="button" class="btn sm" data-act="manItem">Scan</button></div>';
+  } else if (W.step === 'loc') {
+    var it = S.hu[W.item];
+    p += '<div class="icard">' + qr(W.item) + '<div><div class="mono">' + W.item + '</div><div class="psub">' + esc(it.d) + '</div><div class="psub">' + q1(it.qty) + ' ' + it.u + ' · ' + esc(it.loc || 'not yet located') + '</div></div></div>';
+    p += '<div class="viewfinder" style="aspect-ratio:16/7"><div class="corners"></div><div class="laser"></div><div class="hint">Now scan the destination location</div></div>';
+    p += '<div class="labels">' + Object.keys(LOCS).concat([UNKNOWN_LOC]).map(function (k) { return '<button type="button" class="qlabel" data-loc="' + k + '">' + qr(k) + '<span><span class="mono">' + k + '</span></span></button>'; }).join('') + '</div>';
+    p += '<button type="button" class="btn sm" data-act="whBack">Back</button>';
+  } else if (W.step === 'qty') {
+    var it2 = S.hu[W.item], lc = LOCS[W.loc];
+    p += '<dl class="kv"><dt>Item</dt><dd class="mono">' + W.item + '</dd><dt>From</dt><dd class="mono">' + esc(it2.loc || (it2.po ? 'Supplier delivery' : '—')) + '</dd><dt>To</dt><dd class="mono">' + W.loc + '</dd><dt></dt><dd class="psub">' + esc(lc.d) + '</dd></dl>';
+    p += '<label class="field" for="whQty">Quantity (' + it2.u + ', max ' + q1(it2.qty) + ')<input id="whQty" type="number" inputmode="decimal" value="' + esc(W.qty === '' ? it2.qty : W.qty) + '"></label>';
+    p += '<label class="field" for="whCond">Condition<select id="whCond">' + ['Good', 'Damaged', 'Quarantine'].map(function (c) { return '<option' + (W.cond === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></label>';
+    p += '<button type="button" class="btn pri wide" data-act="whSubmit">Confirm movement</button><button type="button" class="btn sm" data-act="whBack">Back</button>';
+  } else {
+    var L = W.last;
+    p += '<div class="pok"><div class="tick">✓</div><b>Movement recorded</b><div class="psub">' + esc(L.txt) + '</div></div><dl class="kv"><dt>Transaction</dt><dd class="mono">' + L.id + '</dd><dt>By</dt><dd>Storekeeper (demo)</dd><dt>Time</dt><dd>' + esc(L.t) + '</dd></dl><button type="button" class="btn pri wide" data-act="whNew">New scan</button>';
+  }
+  p += '</div></div></div>';
+
+  var sel = S.wh.sel, hu = S.hu[sel], hist = (S.hist[sel] || []).slice().reverse();
+  var right = '<div class="stack"><div class="card"><div class="hd"><h2>Item and location history</h2><span class="r"><select id="histSel" aria-label="Choose item" style="border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:var(--surface)">' + Object.keys(S.hu).map(function (k) { return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></span></div><div class="bd stack">' +
+    '<div class="icard">' + qr(sel) + '<div><div class="mono">' + sel + '</div><div class="psub">' + esc(hu.d) + '</div><div class="row-gap" style="margin-top:4px">' + pill(hu.st === 'In stock' || hu.st === 'Dispatched' ? 'ok' : hu.st === 'Issued to production' ? 'info' : 'warn', hu.st) + '<span class="psub">' + q1(hu.qty) + ' ' + hu.u + ' · batch ' + esc(hu.batch) + ' · ' + esc(hu.loc || 'no location') + '</span></div></div></div>' +
+    (hist.length ? '<div class="tw"><table><thead><tr><th>When</th><th>Movement</th><th>From</th><th>To</th><th class="r">Qty</th><th>By</th></tr></thead><tbody>' + hist.map(function (r) { return '<tr><td class="psub">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td class="mono">' + esc(r[2]) + '</td><td class="mono">' + esc(r[3]) + '</td><td class="r">' + esc(r[4]) + '</td><td class="psub">' + esc(r[5]) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="note">No movements yet. Scan this label on the phone to record the first one.</p>') +
+    '</div></div>';
+  right += '<div class="card"><div class="hd"><h2>Try these scenarios</h2></div><div class="bd"><div class="alerts">' +
+    [['Receive PO stock', 'Receive & put away → FUS-PRO-001-B0412 → WH-A03-R02-L04. Updates the PO in Procurement.'],
+     ['Wrong location', 'Put the DGU pallet onto profile rack WH-A03-R02-L04. The system rejects it.'],
+     ['Unknown location', 'Scan WH-A09-R99-L09. It does not exist in the location master.'],
+     ['Pick to production', 'Pick FUS-PRO-014-B0388 to PRD-LINE-A. Stock is issued to ORX-0418.'],
+     ['Dispatch finished goods', 'Dispatch FG-0418-01 to DSP-BAY-02. Blocked until WO-0418-01 is complete.']]
+    .map(function (x) { return '<div class="alert">' + pill('info', x[0]) + '<p class="psub">' + esc(x[1]) + '</p><span></span></div>'; }).join('') + '</div></div></div>';
+  right += '<p class="note">QR marks are illustrative and not scannable. In production, labels would be generated from the existing Oryx inventory system once its integration is confirmed.</p></div>';
+  return h + '<div class="wh">' + p + right + '</div>';
+}
+
+function whValidate() {
+  var W = S.wh, it = S.hu[W.item], loc = LOCS[W.loc];
+  if (!loc) return ['Location not found', W.loc + ' is not in the location master. Check the label or ask the stock controller.'];
+  if (W.mode === 'put') {
+    if (!it.po && it.cat !== 'fg') return ['Nothing to receive', W.item + ' is already in stock at ' + it.loc + '. Use Transfer to move it.'];
+    if (it.cat === 'fg') return ['Use Dispatch', 'Finished goods are booked out from Dispatch, not received.'];
+    if (!S.proc.pos) return ['No open PO', 'There is no issued PO for ' + it.code + ' on ORX-0418. Issue the PO in Procurement first.'];
+    if (loc.type !== 'WH') return ['Not a storage location', 'Put-away must go to a WH- location.'];
+  }
+  if (W.mode === 'move' && (it.po || loc.type !== 'WH')) return it.po ? ['Not received yet', W.item + ' is still on a PO. Receive it first.'] : ['Not a storage location', 'Transfers go between WH- locations.'];
+  if (W.mode === 'pick') {
+    if (loc.type !== 'PRD') return ['Wrong destination', 'Pick to production must go to a PRD- issue point.'];
+    if (it.po) return ['Not received yet', W.item + ' is still on a PO. Receive it first.'];
+    if (!S.prf.released) return ['No released work order', 'ORX-0418 has no released work order to issue against yet.'];
+  }
+  if (W.mode === 'dsp') {
+    if (loc.type !== 'DSP') return ['Wrong destination', 'Dispatch must go to a DSP- bay.'];
+    if (it.cat !== 'fg') return ['Not a finished good', 'Only finished goods or bought-in kits can be dispatched.'];
+    if (!woDone(it.wo)) return ['Work order not complete', it.wo + ' is still in production. Complete it before dispatch.'];
+  }
+  if (loc.accepts.indexOf(it.cat) < 0) return ['Location does not accept this item', W.loc + ' is ' + loc.d.split(' · ')[0].toLowerCase() + '. Choose a matching location.'];
+  return null;
+}
+
+/* ---------- Finance ---------- */
+function vFinance() {
+  var t = totals(), est = {}, fc = 0, i;
+  CATS.forEach(function (c) { est[c[0]] = LINES.reduce(function (a, l) { return a + l.c[c[0]] * l.qty; }, 0); fc += FORECAST[c[0]]; });
+  var fgm = (t.sell - fc) / t.sell * 100;
+  var committed = S.proc.pos ? prGroups().reduce(function (a, g) { return a + g.val; }, 0) : 0;
+  var issued = 0, hrs = 0, scrap = 0;
+  WO_DEF.forEach(function (w) { var s = S.wo[w.id]; hrs += s.hrs; scrap += s.scrap; if (s.issued) { var l = woLine(w); issued += (l.c.mat + l.c.gls + l.c.acc) * l.qty; if (w.also) { var l6 = LINES[5]; issued += (l6.c.mat + l6.c.acc) * l6.qty; } } });
+  var actual = issued + hrs * LABOUR_RATE + scrap * ITEMS['FUS-PRO-001'].price;
+  var h = ph('Finance · Project and company view', 'Profitability and cost', 'Estimated against actual cost for ORX-0418, then the company view: margin, stock, WIP, commitments and cash. Posting rules stay with Finance.');
+  h += '<div class="kpis"><div class="kpi"><span class="l">ORX-0418 contract value</span><span class="v">' + aed(t.sell) + '</span><span class="d">Excl. VAT, from OC</span></div>' +
+    '<div class="kpi"><span class="l">Estimated margin</span><span class="v">' + pct(t.gm) + '</span><span class="d">' + aed(t.sell - t.cost) + ' gross profit</span></div>' +
+    '<div class="kpi warn"><span class="l">Forecast margin</span><span class="v">' + pct(fgm) + '</span><span class="d">' + (fgm - t.gm).toFixed(1) + ' pts vs estimate</span></div>' +
+    '<div class="kpi"><span class="l">Cost to complete</span><span class="v">' + aed(Math.max(0, fc - actual)) + '</span><span class="d">Forecast less actual to date</span></div></div>';
+  h += '<div class="grid g-main"><div class="card"><div class="hd"><h2>ORX-0418 estimated vs forecast cost</h2><span class="sub">Forecast figures are sample values</span></div><div class="tw"><table><thead><tr><th>Cost element</th><th class="r">Estimated</th><th class="r">Forecast</th><th class="r">Variance</th><th>Explanation</th></tr></thead><tbody>' +
+    CATS.map(function (c) { var v = FORECAST[c[0]] - est[c[0]]; return '<tr><td>' + c[1] + '</td><td class="r">' + n0(est[c[0]]) + '</td><td class="r">' + n0(FORECAST[c[0]]) + '</td><td class="r">' + (v ? pill(v > 0 ? 'warn' : 'ok', (v > 0 ? '+' : '') + n0(v)) : '—') + '</td><td class="psub">' + esc(FC_WHY[c[0]]) + '</td></tr>'; }).join('') +
+    '</tbody><tfoot><tr><td>Total (AED)</td><td class="r">' + n0(t.cost) + '</td><td class="r">' + n0(fc) + '</td><td class="r">+' + n0(fc - t.cost) + '</td><td></td></tr></tfoot></table></div></div>';
+  var steps = CATS.filter(function (c) { return FORECAST[c[0]] !== est[c[0]]; }).map(function (c) { return [c[1], -(FORECAST[c[0]] - est[c[0]]) / t.sell * 100]; });
+  h += '<div class="card"><div class="hd"><h2>Margin bridge, ORX-0418</h2></div><div class="bd">' + bridge(t.gm, steps, 'Estimated', 'Forecast') + '</div></div></div>';
+  h += '<div class="card"><div class="hd"><h2>Live from this demo</h2><span class="sub">These figures move as you work through Procurement, Production and the warehouse</span></div><div class="bd"><div class="kpis">' +
+    '<div class="kpi"><span class="l">Purchase commitments</span><span class="v">' + aed(committed) + '</span><span class="d">' + (S.proc.pos ? prGroups().length + ' open POs' : 'No POs issued yet') + '</span></div>' +
+    '<div class="kpi"><span class="l">Material issued to WIP</span><span class="v">' + aed(issued) + '</span><span class="d">At estimated cost</span></div>' +
+    '<div class="kpi"><span class="l">Labour booked</span><span class="v">' + aed(hrs * LABOUR_RATE) + '</span><span class="d">' + q1(hrs) + ' h at AED ' + LABOUR_RATE + '/h (sample rate)</span></div>' +
+    '<div class="kpi ' + (scrap ? 'warn' : '') + '"><span class="l">Scrap cost</span><span class="v">' + aed(scrap * ITEMS['FUS-PRO-001'].price) + '</span><span class="d">' + scrap + ' bars logged</span></div>' +
+    '<div class="kpi ' + (dispatched() ? 'good' : '') + '"><span class="l">Invoicing</span><span class="v">' + (dispatched() ? 'INV-0418-01' : 'Not yet') + '</span><span class="d">' + (dispatched() ? 'Raised on dispatch of FG-0418-01' : 'Triggered by first dispatch') + '</span></div>' +
+    '</div></div></div>';
+
+  var inv = [['Profiles', 0.86], ['Glass', 0.31], ['Accessories & hardware', 0.38], ['Work in progress', 0.34], ['Finished goods', 0.21]];
+  var fam = [['Fusion', 39.5, 36.8], ['Freedom', 41.2, 37.0], ['Renson', 28.4, 27.1], ['Other shading', 33.0, 31.5]];
+  var cash = [['W43', 420, 510], ['W44', 610, 380], ['W45', 290, 460], ['W46', 540, 350], ['W47', 380, 420], ['W48', 720, 400], ['W49', 330, 470], ['W50', 590, 360]];
+  var css = getComputedStyle(document.documentElement), cS = css.getPropertyValue('--steel').trim(), cA = css.getPropertyValue('--accent').trim(), cSil = css.getPropertyValue('--silver').trim();
+  h += '<div class="grid g3"><div class="card"><div class="hd"><h2>Inventory valuation</h2><span class="sub">AED 2.10M, weighted average</span></div><div class="bd"><div class="bars">' +
+    inv.map(function (x) { return '<div class="bar"><span>' + x[0] + '</span><span class="tr"><span class="fl" style="width:' + (x[1] / 0.9 * 100) + '%"></span></span><span class="val">' + x[1].toFixed(2) + 'M</span></div>'; }).join('') +
+    '</div><p class="note" style="margin-top:10px">Aged over 180 days: AED 146k.</p></div></div>';
+  h += '<div class="card"><div class="hd"><h2>Margin by product family</h2></div><div class="bd"><div class="legend" style="margin-bottom:10px"><span><i style="background:' + cA + '"></i>Estimated</span><span><i style="background:' + cS + '"></i>Actual</span></div><div class="bars">' +
+    fam.map(function (x) { return '<div class="bar"><span>' + x[0] + '</span><span style="display:grid;gap:3px"><span class="tr" style="height:7px"><span class="fl" style="width:' + (x[1] / 45 * 100) + '%;background:' + cA + '"></span></span><span class="tr" style="height:7px"><span class="fl" style="width:' + (x[2] / 45 * 100) + '%"></span></span></span><span class="val">' + x[2].toFixed(1) + '%</span></div>'; }).join('') +
+    '</div><p class="note" style="margin-top:10px">Scale 0–45%. Value shown is actual.</p></div></div>';
+  var mx = 800, ch = 120, bw = 12;
+  var svg = '<svg viewBox="0 0 320 150" role="img" aria-label="Eight-week cash flow forecast">';
+  [0, 400, 800].forEach(function (v) { var y = 10 + ch - v / mx * ch; svg += '<line class="gl" x1="30" x2="316" y1="' + y + '" y2="' + y + '"/><text x="26" y="' + (y + 4) + '" text-anchor="end">' + v + '</text>'; });
+  cash.forEach(function (c, k) { var x = 38 + k * 35; svg += '<rect x="' + x + '" y="' + (10 + ch - c[1] / mx * ch) + '" width="' + bw + '" height="' + (c[1] / mx * ch) + '" rx="1.5" fill="' + cA + '"/><rect x="' + (x + bw + 2) + '" y="' + (10 + ch - c[2] / mx * ch) + '" width="' + bw + '" height="' + (c[2] / mx * ch) + '" rx="1.5" fill="' + cSil + '"/><text x="' + (x + bw) + '" y="146" text-anchor="middle">' + c[0] + '</text>'; });
+  svg += '</svg>';
+  h += '<div class="card"><div class="hd"><h2>Cash flow forecast</h2><span class="sub">AED k, next 8 weeks</span></div><div class="bd"><div class="legend" style="margin-bottom:6px"><span><i style="background:' + cA + '"></i>Collections</span><span><i style="background:' + cSil + '"></i>Supplier payments</span></div><div class="bridge">' + svg + '</div></div></div></div>';
+  h += '<div class="grid g2"><div class="card"><div class="hd"><h2>Company position</h2><span class="sub">Sample values</span></div><div class="tw"><table><tbody>' +
+    [['Work in progress', 'AED 0.34M', '11 orders · 2 older than 45 days'], ['Open purchase commitments', 'AED 1.24M', '27 POs · AED 0.41M due in 14 days'], ['Supplier price variance (QTD)', '+AED 136k', 'Mainly Fusion profiles'], ['Receivables over 60 days', 'AED 0.58M', '4 clients'], ['COGS this month', 'AED 1.92M', 'On delivered orders']]
+      .map(function (x) { return '<tr><td>' + x[0] + '</td><td class="r"><b>' + x[1] + '</b></td><td class="psub">' + x[2] + '</td></tr>'; }).join('') +
+    '</tbody></table></div></div><div class="ai"><span class="tag">AI variance explanation · sample</span><p>ORX-0418 is forecast ' + (t.gm - fgm).toFixed(1) + ' points below its estimate. Labour is the largest driver: CNC overtime and glazing-bead rework on the casements. Material follows, from Supplier A\'s price rise after the quotation was approved.</p><p class="psub">Recommendation for review: re-quote Fusion profiles monthly until a price lock is agreed, and add a bead-fit check at assembly.</p><p class="note">AI explains variances. It does not post entries, adjust costs or close periods.</p></div></div>';
+  return h;
+}
+
+/* ---------- Render & events ---------- */
+var VIEWS = { overview: vOverview, estimation: vEstimation, oc: vOC, prf: vPRF, procurement: vProcurement, production: vProduction, warehouse: vWarehouse, finance: vFinance };
+function render() {
+  shell();
+  document.getElementById('view').innerHTML = VIEWS[S.view]();
+  document.getElementById('overlay').innerHTML = S.drawer ? '<div class="scrim" data-act="closeAudit"></div><aside class="drawer" role="dialog" aria-label="Audit trail"><div class="hd"><h2>Audit trail · ORX-0418</h2><span class="sub faint">' + S.audit.length + ' entries</span><button type="button" class="btn sm" style="margin-left:auto" data-act="closeAudit">Close</button></div><div class="bd">' + auditList() + '</div></aside>' : '';
+}
+function go(v, keep) {
+  if (!VIEWS[v]) return;
+  S.view = v; render();
+  if (!keep) window.scrollTo(0, 0);
+  try { history.replaceState(null, '', '#' + v); } catch (e) {}
+}
+
+var A = {
+  approveQ: function () { if (flags().length) return; S.q.approved = true; log('Estimation', 'Estimation Manager', 'Q-2026-0418 Rev 2 approved at ' + aed(totals().sell) + ', margin ' + pct(totals().gm)); log('Sales', 'System', 'OC-2026-0418 generated from approved quotation'); toast('Quotation approved. OC-2026-0418 generated.'); go('oc'); },
+  hinge: function () { S.q.hinge = true; log('Estimation', 'Estimator', 'Line 3: pivot hinge ACC-HDW-PV1 (300 kg) added to BOM'); toast('Hinge added to BOM.'); render(); },
+  glass: function () { S.q.glassOk = true; log('AI check', 'Estimation Manager', 'Line 2 glass cost reviewed: spec and area confirmed'); render(); },
+  raise: function (el) { var id = el.getAttribute('data-l'), l = LINES.filter(function (x) { return x.id === id; })[0], need = Math.ceil(MARGIN_APPROVAL / (100 - MARGIN_APPROVAL) * 100); S.mk[id] = Math.max(S.mk[id], need); S.selLine = id; log('Estimation', 'Estimator', 'Line ' + id.slice(1) + ' markup raised to ' + S.mk[id] + '%'); toast('Line ' + id.slice(1) + ' markup set to ' + S.mk[id] + '%.'); render(); },
+  mApprove: function (el) { var id = el.getAttribute('data-l'), r = calc(LINES.filter(function (x) { return x.id === id; })[0]); S.q.marginOk[id] = r.mk; log('Approval', 'Commercial Director', 'Line ' + id.slice(1) + ' approved at ' + pct(r.gm) + ' gross margin (below ' + MARGIN_APPROVAL + '% threshold)'); toast('Margin exception approved.'); render(); },
+  issueOC: function () { S.oc.issued = true; log('Sales', 'Sales Coordinator', 'OC-2026-0418 issued to client'); log('Projects', 'System', 'PRF-0418 Rev A drafted from OC-2026-0418'); toast('OC issued. PRF-0418 drafted.'); go('prf'); },
+  releasePRF: function () { S.prf.released = true; log('Projects', 'Projects Manager', 'PRF-0418 Rev A released: 4 lines to production, 2 lines to procurement'); toast('PRF released to Procurement and Production.'); go('procurement'); },
+  createPR: function () { S.proc.prs = true; var g = prGroups(); log('Procurement', 'System', g.length + ' purchase requisitions created from net shortages (' + g.map(function (x) { return x.pr; }).join(', ') + ')'); toast(g.length + ' purchase requisitions drafted.'); render(); },
+  issuePO: function () { S.proc.pos = true; var g = prGroups(); log('Procurement', 'Procurement Officer', 'POs issued: ' + g.map(function (x) { return x.po; }).join(', ') + ' · ' + aed(g.reduce(function (a, x) { return a + x.val; }, 0))); toast('POs issued. Work orders can be released.'); render(); },
+  woRel: function () { var s = S.wo[S.selWo]; if (!S.proc.pos) return; s.rel = true; log('Production', 'Production Supervisor', S.selWo + ' released to floor; materials reserved'); render(); },
+  woStep: function () { var w = WO_DEF.filter(function (x) { return x.id === S.selWo; })[0], s = S.wo[w.id]; var hrs = w.std / w.steps.length * (s.step === 1 && w.ws === 'Fusion' ? 1.25 : 1.04); s.hrs += hrs; log('Production', 'Production Supervisor', w.id + ': ' + w.steps[s.step] + ' complete (' + q1(hrs) + ' h)'); s.step++; if (woDone(w.id)) { log('Production', 'QC Inspector', w.id + ' passed final QC; finished goods ready for put-away'); if (w.id === 'WO-0418-01') { S.hu['FG-0418-01'].st = 'Ready for dispatch'; S.hu['FG-0418-01'].loc = 'WH-D01-R01-L01'; } toast(w.id + ' complete.'); } render(); },
+  woIssue: function () { var s = S.wo[S.selWo]; s.issued = true; log('Production', 'Storekeeper', 'Materials issued to ' + S.selWo + ' against approved BOM'); render(); },
+  woScrap: function () { S.wo[S.selWo].scrap++; log('Production', 'Production Supervisor', S.selWo + ': 1 bar FUS-PRO-001 scrapped (miscut)'); render(); },
+  audit: function () { S.drawer = true; render(); },
+  closeAudit: function () { S.drawer = false; render(); },
+  manItem: function () { var v = (document.getElementById('manItem').value || '').trim().toUpperCase(); scanItem(v); },
+  whBack: function () { var W = S.wh; W.err = null; W.step = W.step === 'qty' ? 'loc' : 'item'; render(); },
+  whNew: function () { var W = S.wh; W.step = 'item'; W.item = W.loc = null; W.qty = ''; W.err = null; render(); },
+  whSubmit: function () {
+    var W = S.wh, it = S.hu[W.item], q = parseFloat(document.getElementById('whQty').value), cond = document.getElementById('whCond').value;
+    W.qty = isNaN(q) ? '' : q; W.cond = cond;
+    if (isNaN(q) || q <= 0) { W.err = ['Enter a quantity', 'Quantity must be more than zero.']; render(); return; }
+    if (q > it.qty + 1e-9) { W.err = ['Quantity too high', 'Only ' + q1(it.qty) + ' ' + it.u + ' on this label. Count again or split the bundle.']; render(); return; }
+    var from = it.loc || (it.po ? 'Supplier' : '—'), id = 'MV-' + String(26000 + S.audit.length), modeTxt = MODES.filter(function (m) { return m[0] === W.mode; })[0][1];
+    var label = W.mode === 'put' ? 'Received and put away' : W.mode === 'move' ? 'Transferred' : W.mode === 'pick' ? 'Issued to production' : 'Dispatched';
+    (S.hist[W.item] = S.hist[W.item] || []).push([now(), label + (cond !== 'Good' ? ' (' + cond.toLowerCase() + ')' : ''), from, W.loc, q1(q) + ' ' + it.u, 'Storekeeper']);
+    if (W.mode === 'put') { it.po = false; it.st = cond === 'Good' ? 'In stock' : cond; S.proc.received[it.code] = true; }
+    if (W.mode === 'pick') { it.st = 'Issued to production'; }
+    if (W.mode === 'dsp') { it.st = 'Dispatched'; log('Finance', 'System', 'INV-0418-01 progress invoice raised on dispatch DN-0418-01'); }
+    if (W.mode === 'move' && cond !== 'Good') it.st = cond;
+    it.loc = W.loc; if (W.mode === 'pick' || W.mode === 'dsp') it.qty = Math.max(0, it.qty - q);
+    var txt = q1(q) + ' ' + it.u + ' of ' + W.item + ' · ' + from + ' → ' + W.loc;
+    log('Warehouse', 'Storekeeper', modeTxt + ': ' + txt + ' (' + id + ')');
+    W.last = { id: id, txt: txt, t: now() }; W.step = 'done'; W.err = null; W.sel = W.item; render();
+  },
+  ff: function () {
+    S.q.hinge = true; S.q.glassOk = true; S.q.marginOk.L5 = S.mk.L5; S.q.approved = true; S.oc.issued = true;
+    CHECKS.forEach(function (c) { S.prf.checks[c[0]] = true; }); S.prf.released = true; S.proc.prs = true; S.proc.pos = true;
+    var it = S.hu['FUS-PRO-001-B0412']; it.po = false; it.st = 'In stock'; it.loc = 'WH-A03-R02-L04'; S.proc.received['FUS-PRO-001'] = true;
+    (S.hist['FUS-PRO-001-B0412'] = []).push([dstr(TODAY) + ' · 08:30', 'Received and put away', 'Supplier', 'WH-A03-R02-L04', '46 bars', 'Storekeeper']);
+    WO_DEF.forEach(function (w, i) { var s = S.wo[w.id]; s.rel = true; s.issued = i < 2; s.step = i === 0 ? w.steps.length - 1 : i === 1 ? 2 : 0; s.hrs = w.std / w.steps.length * s.step * 1.08; });
+    log('Demo', 'System', 'Fast-forwarded: quotation approved, OC issued, PRF released, POs issued, work orders released');
+    S.selWo = 'WO-0418-01'; toast('Fast-forwarded. Complete WO-0418-01 packing, then dispatch FG-0418-01.'); go('production');
+  },
+  reset: function () { fresh(); toast('Demo reset.'); go('overview'); }
+};
+function scanItem(code) {
+  var W = S.wh;
+  if (!S.hu[code]) { W.err = ['Label not recognised', (code || 'Blank code') + ' is not a known item, bundle or pallet label.']; render(); return; }
+  W.item = code; W.step = 'loc'; W.err = null; W.sel = code; W.qty = ''; render();
+}
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-go],[data-act],[data-line],[data-wo],[data-scan],[data-loc],[data-mode]');
+  if (!t) return;
+  if (t.hasAttribute('data-act')) { var f = A[t.getAttribute('data-act')]; if (f && !t.disabled) f(t); return; }
+  if (t.hasAttribute('data-go')) { S.drawer = false; go(t.getAttribute('data-go')); return; }
+  if (t.hasAttribute('data-line')) { if (e.target.closest('input')) return; S.selLine = t.getAttribute('data-line'); render(); return; }
+  if (t.hasAttribute('data-wo')) { S.selWo = t.getAttribute('data-wo'); render(); return; }
+  if (t.hasAttribute('data-scan')) { scanItem(t.getAttribute('data-scan')); return; }
+  if (t.hasAttribute('data-loc')) { S.wh.loc = t.getAttribute('data-loc'); S.wh.err = whValidate(); if (!S.wh.err) S.wh.step = 'qty'; render(); return; }
+  if (t.hasAttribute('data-mode')) { var W = S.wh; W.mode = t.getAttribute('data-mode'); W.step = 'item'; W.item = W.loc = null; W.err = null; render(); }
+});
+document.addEventListener('change', function (e) {
+  var t = e.target;
+  if (t.hasAttribute('data-mk')) { var v = parseFloat(t.value); if (!isNaN(v) && v >= 0) { var id = t.getAttribute('data-mk'); S.mk[id] = Math.min(200, Math.round(v)); S.selLine = id; } render(); var el = document.getElementById(t.id); if (el) el.focus(); }
+  else if (t.hasAttribute('data-ck')) { S.prf.checks[t.getAttribute('data-ck')] = t.checked; if (t.checked) log('Projects', 'Projects Manager', 'PRF-0418 check complete: ' + CHECKS.filter(function (c) { return c[0] === t.getAttribute('data-ck'); })[0][1]); render(); }
+  else if (t.id === 'histSel') { S.wh.sel = t.value; render(); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && S.drawer) { S.drawer = false; render(); }
+  if (e.key === 'Enter' && e.target.id === 'manItem') A.manItem();
+});
+
+fresh();
+var h0 = (location.hash || '').slice(1);
+S.view = VIEWS[h0] ? h0 : 'overview';
+render();
+})();
+</script>
+</body></html>
